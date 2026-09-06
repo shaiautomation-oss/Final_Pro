@@ -331,20 +331,30 @@
     <h2>המערכת בפעולה</h2>
     <p class="lede">צילומי מסך מהמערכת החיה.</p>
     <div class="gallery" id="shots">
-      <figure><img src="screenshots/01-invoice.png" alt="חשבונית מס שהופקה אוטומטית" loading="lazy">
-        <figcaption>החשבונית שהופקה אוטומטית — מע"מ 18%, מספור רץ ותבנית RTL</figcaption></figure>
-      <figure><img src="screenshots/02-customer-bot.png" alt="שיחה עם בוט הלקוחות" loading="lazy">
-        <figcaption>סוכן שירות הלקוחות עונה על מדיניות ומוצרים</figcaption></figure>
-      <figure><img src="screenshots/03-manager-bot.png" alt="שיחה עם בוט המנהל" loading="lazy">
-        <figcaption>סוכן המנהל — נתוני הכנסות ובקרת הרשאות</figcaption></figure>
-      <figure><img src="screenshots/04-app-dashboard.png" alt="דשבורד אפליקציית הניהול" loading="lazy">
-        <figcaption>אפליקציית הניהול — דשבורד, טבלאות וצ'אט</figcaption></figure>
-      <figure><img src="screenshots/05-airtable.png" alt="טבלת החשבוניות ב-Airtable" loading="lazy">
-        <figcaption>הנתונים ב-Airtable אחרי ריצה מלאה</figcaption></figure>
-      <figure><img src="screenshots/06-canvas.png" alt="קנבס אוטומציה ב-n8n" loading="lazy">
-        <figcaption>קנבס האוטומציה — צמתים ותיאורים בעברית</figcaption></figure>
-      <figure><img src="screenshots/07-executions.png" alt="מסך Executions ב-n8n" loading="lazy">
-        <figcaption>הרצות המערכת</figcaption></figure>
+      <figure><img src="screenshots/01-app-new-invoice.png" alt="יצירת חשבונית באפליקציית הניהול — לקוח וסכום בלבד" loading="lazy">
+        <figcaption>יצירת חשבונית באפליקציית הניהול — לקוח וסכום בלבד</figcaption></figure>
+      <figure><img src="screenshots/02-airtable-invoice-created.png" alt="הרשומה נוצרת ב-Airtable דרך ה-Webhook" loading="lazy">
+        <figcaption>הרשומה נוצרת ב-Airtable דרך ה-Webhook</figcaption></figure>
+      <figure><img src="screenshots/03-airtable-invoice-processed.png" alt="WF1 חישב מע"מ 18%, סכום כולל ומספר מסמך רץ" loading="lazy">
+        <figcaption>WF1 חישב מע"מ 18%, סכום כולל ומספר מסמך רץ</figcaption></figure>
+      <figure><img src="screenshots/04-invoice-pdf-drive.png" alt="WF8 הפיק PDF בעברית RTL והעלה לגוגל דרייב" loading="lazy">
+        <figcaption>WF8 הפיק PDF בעברית RTL והעלה לגוגל דרייב</figcaption></figure>
+      <figure><img src="screenshots/05-app-new-lead.png" alt="יצירת ליד מהאפליקציה" loading="lazy">
+        <figcaption>יצירת ליד מהאפליקציה</figcaption></figure>
+      <figure><img src="screenshots/06-airtable-lead-created.png" alt="הליד נקלט ב-Airtable בסטטוס New" loading="lazy">
+        <figcaption>הליד נקלט ב-Airtable בסטטוס New</figcaption></figure>
+      <figure><img src="screenshots/07-cold-email.png" alt="המייל הקר שסוכן המכירות ניסח ושלח" loading="lazy">
+        <figcaption>המייל הקר שסוכן המכירות ניסח ושלח</figcaption></figure>
+      <figure><img src="screenshots/08-airtable-lead-contacted.png" alt="הסטטוס מתעדכן ל-Contacted אחרי השליחה" loading="lazy">
+        <figcaption>הסטטוס מתעדכן ל-Contacted אחרי השליחה</figcaption></figure>
+      <figure><img src="screenshots/09-customer-bot.png" alt="סוכן שירות הלקוחות עונה מתוך המדיניות והקטלוג" loading="lazy">
+        <figcaption>סוכן שירות הלקוחות עונה מתוך המדיניות והקטלוג</figcaption></figure>
+      <figure><img src="screenshots/10-manager-bot.png" alt="סוכן המנהל מדווח הכנסות ויתרות" loading="lazy">
+        <figcaption>סוכן המנהל מדווח הכנסות ויתרות</figcaption></figure>
+      <figure><img src="screenshots/11-manager-alert.png" alt="התראה אוטומטית כשליד משיב למייל" loading="lazy">
+        <figcaption>התראה אוטומטית כשליד משיב למייל</figcaption></figure>
+      <figure><img src="screenshots/12-app-dashboard.png" alt="הדשבורד המרכזי של אפליקציית הניהול" loading="lazy">
+        <figcaption>הדשבורד המרכזי של אפליקציית הניהול</figcaption></figure>
     </div>
     <p class="gallery-empty" id="empty" hidden>צילומי המסך יתווספו בקרוב.</p>
   </div>
@@ -353,28 +363,30 @@
 <section id="canvases">
   <div class="wrap">
     <h2>הקנבסים ב-n8n</h2>
-    <p class="lede">עשרת התהליכים כפי שהם נראים על הקנבס — שמות צמתים ותיאורים בעברית.</p>
+    <p class="lede">התהליכים כפי שהם נראים על הקנבס, אחרי הרצה מוצלחת — שמות צמתים ותיאורים בעברית.</p>
     <div class="gallery" id="canvas-shots">
-      <figure><img src="screenshots/workflows/wf1.png" alt="WF1 — אימות מסמכי מס" loading="lazy">
-        <figcaption><b>WF1</b> — אימות מסמכי מס</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf3.png" alt="WF3 — קליטת לידים וסינון כפילויות" loading="lazy">
-        <figcaption><b>WF3</b> — קליטת לידים וסינון כפילויות</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf4a.png" alt="WF4a — סוכן מכירות — מיילים קרים" loading="lazy">
-        <figcaption><b>WF4a</b> — סוכן מכירות — מיילים קרים</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf4b.png" alt="WF4b — סוכן מכירות — זיהוי תשובות" loading="lazy">
-        <figcaption><b>WF4b</b> — סוכן מכירות — זיהוי תשובות</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf5.png" alt="WF5 — סוכן שירות לקוחות" loading="lazy">
-        <figcaption><b>WF5</b> — סוכן שירות לקוחות</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf6.png" alt="WF6 — מדיניות אל מאגר וקטורי" loading="lazy">
-        <figcaption><b>WF6</b> — מדיניות אל מאגר וקטורי</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf7.png" alt="WF7 — מוצרים אל מאגר וקטורי" loading="lazy">
-        <figcaption><b>WF7</b> — מוצרים אל מאגר וקטורי</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf8.png" alt="WF8 — הפקת מסמך חשבונית" loading="lazy">
-        <figcaption><b>WF8</b> — הפקת מסמך חשבונית</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf9.png" alt="WF9 — סוכן המנהל" loading="lazy">
-        <figcaption><b>WF9</b> — סוכן המנהל</figcaption></figure>
-      <figure><img src="screenshots/workflows/wf13.png" alt="WF13 — Webhook לאפליקציה" loading="lazy">
-        <figcaption><b>WF13</b> — Webhook לאפליקציה</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf1.png" alt="WF1 — אימות מסמכי מס — מע"מ, מספור ותור הפקה" loading="lazy">
+        <figcaption><b>WF1</b> — אימות מסמכי מס — מע"מ, מספור ותור הפקה</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf3-create.png" alt="WF3 — קליטת ליד חדש — מסלול היצירה" loading="lazy">
+        <figcaption><b>WF3</b> — קליטת ליד חדש — מסלול היצירה</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf3-duplicate.png" alt="WF3 — אותו ליד בשנית — מסלול הכפילות" loading="lazy">
+        <figcaption><b>WF3</b> — אותו ליד בשנית — מסלול הכפילות</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf4a.png" alt="WF4a — סוכן מכירות — ניסוח ושליחת מייל קר" loading="lazy">
+        <figcaption><b>WF4a</b> — סוכן מכירות — ניסוח ושליחת מייל קר</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf4b.png" alt="WF4b — זיהוי תשובה, עדכון סטטוס והתראה למנהל" loading="lazy">
+        <figcaption><b>WF4b</b> — זיהוי תשובה, עדכון סטטוס והתראה למנהל</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf5.png" alt="WF5 — סוכן שירות לקוחות עם שני כלי RAG" loading="lazy">
+        <figcaption><b>WF5</b> — סוכן שירות לקוחות עם שני כלי RAG</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf6.png" alt="WF6 — 12 מסמכי מדיניות אל המאגר הווקטורי" loading="lazy">
+        <figcaption><b>WF6</b> — 12 מסמכי מדיניות אל המאגר הווקטורי</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf7.png" alt="WF7 — 34 מוצרים אל המאגר הווקטורי" loading="lazy">
+        <figcaption><b>WF7</b> — 34 מוצרים אל המאגר הווקטורי</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf8.png" alt="WF8 — בניית המסמך, המרה ל-PDF והעלאה לדרייב" loading="lazy">
+        <figcaption><b>WF8</b> — בניית המסמך, המרה ל-PDF והעלאה לדרייב</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf9.png" alt="WF9 — סוכן המנהל עם בקרת הרשאות" loading="lazy">
+        <figcaption><b>WF9</b> — סוכן המנהל עם בקרת הרשאות</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf13.png" alt="WF13 — נקודת הכניסה של האפליקציה — ארבע פעולות" loading="lazy">
+        <figcaption><b>WF13</b> — נקודת הכניסה של האפליקציה — ארבע פעולות</figcaption></figure>
     </div>
     <p class="gallery-empty" id="canvas-empty" hidden>צילומי הקנבסים יתווספו בקרוב.</p>
   </div>
