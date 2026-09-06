@@ -67,6 +67,7 @@ ERP-AI/
 ├── app/
 │   ├── base44-prompt.md           פרומט הבנייה של האפליקציה
 │   └── Dashboard.html             דשבורד עצמאי בקובץ אחד
+├── screenshots/                   תיעוד ויזואלי של המערכת בפעולה
 └── docs/
     ├── 01-setup.md                כך הקמתי את המערכת
     ├── 02-data-schema.md          סכימת Airtable ומילון סטטוסים
