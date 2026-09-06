@@ -343,7 +343,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ ok: true, table: $('בקשה מהאפליקציה').item.json.body.table, records: $input.all().map(i => Object.assign({ id: i.json.id }, i.json.fields || i.json)) }) }}",
+        "responseBody": "={{ JSON.stringify({ ok: true, table: $('בקשה מהאפליקציה').item.json.body.table, records: $input.all().filter(i => i.json && i.json.id).map(i => Object.assign({ id: i.json.id }, i.json.fields || i.json)) }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
@@ -354,7 +354,7 @@
       ],
       "id": "f4e26ca3-fcdb-e5b4-dbd6-6531efc1abc3",
       "name": "תשובה - רשימה",
-      "notes": "שלב 4ב — מחזיר את הרשומות כמערך records.",
+      "notes": "שלב 4ב — מחזיר את הרשומות כמערך records. פריט ריק שנוצר כשאין תוצאות מסונן החוצה.",
       "notesInFlow": true
     },
     {

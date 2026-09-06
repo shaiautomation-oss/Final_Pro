@@ -6,7 +6,7 @@
         "color": 5,
         "width": 720,
         "height": 340,
-        "content": "## WF8 — הפקת מסמך חשבונית והעלאה לגוגל דרייב\n**מה זה עושה:** כל דקה מחפש חשבונית אחת בסטטוס `Ready` שעדיין אין לה מסמך, ממלא את תבנית ה-HTML בעברית RTL בנתוני החשבונית, הופך אותה לקובץ, מעלה לגוגל דרייב ושומר את הקישור בשדה `PdfUrl` — ואז מסמן `Issued`.\n\n**התבנית** יושבת בצומת `בניית HTML`, בשדה `html`.\n\n**למה HTML ולא PDF:** כדי לא להקים שירות המרה חיצוני. ההמרה ל-PDF היא ידנית: בדרייב → קליק ימני → פתיחה באמצעות Google Docs → File → Download → PDF.\n\n**מה צריך:** חיבור Airtable וחיבור Google Drive."
+        "content": "## WF8 — הפקת מסמך חשבונית והעלאה לגוגל דרייב\n**מה זה עושה:** כל דקה מחפש חשבונית אחת בסטטוס `Ready` שעדיין אין לה מסמך, ממלא את תבנית ה-HTML בעברית RTL בנתוני החשבונית, הופך אותה לקובץ, מעלה לגוגל דרייב ושומר את הקישור בשדה `PdfUrl` — ואז מסמן `Issued`.\n\n**התבנית** יושבת בצומת `בניית HTML`, בשדה `html`.\n\n**למה HTML ולא PDF:** כדי לא להקים שירות המרה חיצוני. ההמרה ל-PDF היא ידנית: בדרייב → קליק ימני → פתיחה באמצעות Google Docs → File → Download → PDF.\n\n**מה צריך:** חיבור Airtable, חיבור Google Drive וחיבור PDFShift (Basic Auth)."
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -178,7 +178,7 @@
             {
               "id": "6272653a-eddd-2a26-4c65-5afc94f120a0",
               "name": "fileName",
-              "value": "={{ ($json.fields || $json).InvoiceNumber + '.html' }}",
+              "value": "={{ ($json.fields || $json).InvoiceNumber + '.pdf' }}",
               "type": "string"
             }
           ]
@@ -232,27 +232,6 @@
       "id": "5feb019f-197f-8132-9868-87591b999104",
       "name": "בניית HTML",
       "notes": "שלב 5 — כאן יושבת תבנית החשבונית בעברית RTL. לעריכת המסמך — פתחו את השדה html.",
-      "notesInFlow": true
-    },
-    {
-      "parameters": {
-        "operation": "toText",
-        "sourceProperty": "html",
-        "options": {
-          "fileName": "={{ $json.fileName }}",
-          "mimeType": "text/html",
-          "encoding": "utf8"
-        }
-      },
-      "type": "n8n-nodes-base.convertToFile",
-      "typeVersion": 1.1,
-      "position": [
-        368,
-        -48
-      ],
-      "id": "412228f2-ad29-a8b3-4660-010161e9edd5",
-      "name": "המרה לקובץ",
-      "notes": "שלב 6 — הופך את ה-HTML לקובץ בינארי מוכן להעלאה.",
       "notesInFlow": true
     },
     {
@@ -439,6 +418,41 @@
           "name": "Airtable account"
         }
       }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source: $json.html, format: 'A4', sandbox: false }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        368,
+        -48
+      ],
+      "id": "03f3b44f-08ca-96dd-649a-4e1f7439b13d",
+      "name": "המרה ל-PDF",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "PDFSHIFT_CREDENTIAL",
+          "name": "PDFShift"
+        }
+      },
+      "notes": "שלב 6 — שולח את ה-HTML ל-PDFShift ומקבל בחזרה קובץ PDF מרונדר, זהה לתצוגה בדפדפן.",
+      "notesInFlow": true
     }
   ],
   "pinData": {},
@@ -491,18 +505,7 @@
       "main": [
         [
           {
-            "node": "המרה לקובץ",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "המרה לקובץ": {
-      "main": [
-        [
-          {
-            "node": "העלאה לגוגל דרייב",
+            "node": "המרה ל-PDF",
             "type": "main",
             "index": 0
           }
@@ -514,6 +517,17 @@
         [
           {
             "node": "שמירת קישור המסמך",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "המרה ל-PDF": {
+      "main": [
+        [
+          {
+            "node": "העלאה לגוגל דרייב",
             "type": "main",
             "index": 0
           }
