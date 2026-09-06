@@ -34,6 +34,58 @@
 | **לוגיקה ואוטומציה** | n8n Cloud | 10 תהליכים + 3 סוכני AI + מאגר וקטורי |
 | **ממשק** | אפליקציית ווב | דשבורד, טבלאות, טפסים וצ'אט |
 
+### הארכיטקטורה
+
+```mermaid
+flowchart RL
+  subgraph IN["נכנס"]
+    direction TB
+    T1["בוט טלגרם מנהל"]
+    T2["בוט טלגרם לקוחות"]
+    T3["Gmail — דואר נכנס"]
+    T4["לוחות זמנים"]
+    T5["אפליקציית הניהול"]
+  end
+
+  subgraph CORE["n8n — 10 תהליכים"]
+    direction TB
+    AG["3 סוכני AI"]
+    VS["מאגר וקטורי — RAG"]
+    WF["אוטומציות<br/>מעמ · מסמכים · לידים"]
+    AG <--> VS
+    AG --- WF
+  end
+
+  subgraph OUT["יוצא"]
+    direction TB
+    AT["Airtable<br/>4 טבלאות"]
+    GD["Google Drive<br/>מסמכי חשבונית"]
+    GS["Gmail<br/>מיילי מכירות"]
+  end
+
+  T1 --> AG
+  T2 --> AG
+  T3 --> WF
+  T4 --> WF
+  T5 --> WF
+
+  WF --> AT
+  WF --> GD
+  WF --> GS
+  AG --> AT
+
+  classDef in fill:#e8f4fd,stroke:#5fa4dd,color:#0f1b2d
+  classDef core fill:#e6f7f4,stroke:#0d9488,color:#0f1b2d
+  classDef out fill:#f3f0fb,stroke:#7c6bd4,color:#0f1b2d
+  class T1,T2,T3,T4,T5 in
+  class AG,VS,WF core
+  class AT,GD,GS out
+```
+
+במרכז יושב n8n. אליו נכנסים אירועים — הודעות טלגרם, מיילים, לוחות זמנים
+וקריאות מהאפליקציה — וממנו יוצאות פעולות לשירותים החיצוניים. האפליקציה אינה
+ניגשת ל-Airtable ישירות אלא רק דרך n8n.
+
 ---
 
 ## עשרת התהליכים
