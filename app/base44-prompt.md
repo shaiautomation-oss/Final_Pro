@@ -1,29 +1,30 @@
 <div dir="rtl" align="right">
 
-# אפליקציית הניהול — Base44
+# אפליקציית הניהול
 
-האפליקציה היא ממשק הניהול של המערכת — מה שבעל העסק פותח בבוקר. בונים אותה
-בתיאור בשפה חופשית, בלי לכתוב backend.
+ממשק הניהול של המערכת — מה שבעל העסק פותח בבוקר. בניתי אותו בתיאור בשפה
+חופשית, בלי לכתוב backend.
 
 ---
 
-## עקרון האבטחה — לא לדלג
+## עקרון האבטחה
 
 האפליקציה **אינה** מחזיקה את מפתח ה-Airtable. כל קריאה וכל כתיבה עוברות דרך
-ה-Webhook של WF13, ו-n8n הוא זה שמחזיק את ה-credentials ואוכף את הכללים.
+ה-Webhook של WF13, ו-n8n הוא זה שמחזיק את ה-credentials ואוכף את הכללים
+במקום אחד.
 
 ```
-Base44  ──POST { action, table, payload }──►  n8n (WF13)  ──►  Airtable
-        ◄─────────── JSON ──────────────────              ◄──
+האפליקציה  ──POST { action, table, payload }──►  n8n (WF13)  ──►  Airtable
+           ◄─────────────── JSON ───────────────              ◄──
 ```
 
-מה שנשמר באפליקציה כ-secret הוא **כתובת ה-Webhook בלבד** — לא טוקן, לא מפתח.
+מה שנשמר באפליקציה כ-secret הוא **כתובת ה-Webhook בלבד** — לא טוקן ולא מפתח.
 
 ---
 
-## פרומט הבנייה הראשוני
+## הפרומט הראשון — בניית המסכים
 
-העתיקו את הבלוק הזה לצ'אט הבנייה של Base44:
+זה הפרומט שממנו בניתי את השלד: מסכים, טבלאות, טפסים ופאנל צ'אט.
 
 ```
 Build an internal admin app for a small Israeli electronics business.
@@ -35,24 +36,6 @@ Data comes from a single REST endpoint I will provide (an n8n webhook).
 Do NOT create your own database and do NOT store any API key in the browser.
 Store the endpoint URL as a secret named N8N_WEBHOOK_URL and call it from
 the server side.
-
-Every request is a POST to that same URL with a JSON body:
-  read:    { "action": "list",   "table": "<Table>", "limit": 100 }
-           -> { "ok": true, "records": [ { "id": "...", ...fields } ] }
-  create:  { "action": "create", "table": "<Table>", "payload": { ...fields } }
-           -> { "ok": true, "record": { ... } }
-  update:  { "action": "update", "table": "<Table>", "payload": { "id": "...", ...fields } }
-           -> { "ok": true, "record": { ... } }
-  chat:    { "action": "chat",   "message": "..." }
-           -> { "ok": true, "reply": "..." }
-
-Table names are exactly: Invoices, Leads, Products, Tasks.
-
-Fields:
-  Invoices: InvoiceNumber, CustomerId, Amount, VatAmount, Total, Status, PdfUrl, Created
-  Leads:    Name, Email, Company, Status, Created
-  Products: Name, Category, Price, Description, InStock
-  Tasks:    Title, Status
 
 Dashboard shows four KPI cards: total revenue (sum of Total), number of
 invoices, open amount (sum of Total where Status is not "Paid"), and leads
@@ -72,72 +55,89 @@ Tasks: Title and Status, with a checkbox to toggle Status between
 "Open" and "Done".
 
 Add a chat panel that POSTs { "action": "chat", "message": <text> } and
-renders the "reply" field from the response. Keep the conversation visible
-on screen.
+renders the "reply" field from the response.
 ```
 
 ---
 
-## שיפורים אחרי הפרומט הראשוני
+## הפרומט השני — חיבור ל-n8n
 
-כך עובדים בפלטפורמות האלה — פרומט אחד גדול, ואז שיפורים קטנים בזה אחר זה.
-סדר מומלץ:
+אחרי שהשלד עמד, חיברתי את האפליקציה למערכת האמיתית והסרתי כל מקור נתונים
+מקומי:
 
-1. `הפוך את הדשבורד לשתי עמודות במסך רחב ולעמודה אחת בנייד`
-2. `הצג את הסכומים עם הפרדת אלפים וסימן ₪ מימין למספר`
-3. `צבע את הסטטוסים: Ready כחול, Issued ירוק, Invalid אדום, Paid אפור`
-4. `הוסף סינון לפי סטטוס מעל כל טבלה`
-5. `בטבלת החשבוניות, הפוך את PdfUrl לכפתור "פתח מסמך" במקום קישור גולמי`
-6. `הוסף כפתור "סמן כשולם" בשורת חשבונית — הוא שולח update עם Status = Paid`
-7. `בטופס ליד חדש, ולידציה שכתובת המייל תקינה לפני שליחה`
-8. `הצג הודעת שגיאה קריאה כשהתשובה מהשרת היא ok: false`
-9. `הוסף מצב טעינה (spinner) לכל טבלה בזמן שהנתונים נטענים`
-10. `בפאנל הצ'אט, הצג "מקליד..." בזמן ההמתנה לתשובה`
+```
+Connect this app to my backend.
+
+There is a single REST endpoint (an n8n webhook). Its URL is stored as a
+secret named N8N_WEBHOOK_URL. Call it only from the server side, never
+from the browser. Remove any local or mock data source.
+
+Every request is a POST to that same URL with a JSON body:
+
+  { "action": "list",   "table": "<Table>", "limit": 100 }
+  { "action": "create", "table": "<Table>", "payload": { ...fields } }
+  { "action": "update", "table": "<Table>", "payload": { "id": "...", ...fields } }
+  { "action": "chat",   "message": "..." }
+
+Responses:
+  list   -> { ok: true, table, records: [ { id, ...fields } ] }
+  create -> { ok: true, action: "create", record: { id, ...fields } }
+  update -> { ok: true, action: "update", record: { id, ...fields } }
+  chat   -> { ok: true, reply: "markdown text" }
+  error  -> { ok: false, error: "..." } with HTTP 400
+
+Tables and fields:
+  Invoices: InvoiceNumber, CustomerId, Amount, VatAmount, Total, Status, PdfUrl, Created
+  Leads:    Name, Email, Company, Status, Created
+  Products: Name, Category, Price, Description, InStock
+  Tasks:    Title, Status
+
+The chat panel must POST { "action": "chat", "message": <text> } and render
+the "reply" field as Markdown - it contains ** bold ** and newlines.
+
+When creating an invoice, send only CustomerId and Amount. The backend fills
+InvoiceNumber, VatAmount, Total and PdfUrl within about two minutes, so
+refresh the Invoices table automatically every 30 seconds.
+
+In the Invoices table, render PdfUrl as a button labeled "פתח מסמך" that
+opens in a new tab.
+```
 
 ---
 
-## מה חייב להיות באפליקציה (מינימום נדרש)
+## השיפורים שהוספתי אחר כך
 
-| רכיב | תוכן |
-|---|---|
-| **דשבורד** | הכנסות, מספר חשבוניות, סכום פתוח, לידים לפי סטטוס, משימות להיום |
-| **מסכי טבלה** | חשבוניות, לידים, מוצרים, משימות — תצוגה, חיפוש וסינון |
-| **טפסים** | יצירת ליד / חשבונית — הכתיבה מפעילה את הטריגרים ב-n8n |
-| **קישור למסמכים** | לינק למסמך שהופק ונשמר ב-Google Drive (`PdfUrl`) |
-| **צ'אט** | פאנל שמדבר עם הסוכן דרך `action: "chat"` |
+כך עובדים בפלטפורמה: פרומט אחד גדול, ואז שיפורים קטנים בזה אחר זה. אלה
+השיפורים שהחלתי, לפי הסדר:
+
+1. דשבורד בשתי עמודות במסך רחב, ובעמודה אחת בנייד
+2. סכומים עם הפרדת אלפים וסימן ₪ מימין למספר
+3. צביעת סטטוסים — `Ready` כחול, `Issued` ירוק, `Invalid` אדום, `Paid` אפור
+4. סינון לפי סטטוס מעל כל טבלה
+5. `PdfUrl` כפתור "פתח מסמך" במקום קישור גולמי
+6. כפתור "סמן כשולם" בשורת חשבונית, ששולח `update` עם `Status = Paid`
+7. ולידציה של כתובת המייל בטופס ליד חדש
+8. הודעת שגיאה קריאה כשהתשובה מהשרת היא `ok: false`
+9. מצב טעינה בכל טבלה בזמן שהנתונים נטענים
+10. חיווי "מקליד..." בפאנל הצ'אט בזמן ההמתנה לתשובה
 
 ---
 
 ## נקודה שקל לפספס
 
-כשהאפליקציה יוצרת חשבונית, היא שולחת **רק** `CustomerId` ו-`Amount`.
-את `VatAmount`, `Total` ו-`InvoiceNumber` ממלא WF1 תוך דקה, ואת `PdfUrl`
+כשהאפליקציה יוצרת חשבונית היא שולחת **רק** `CustomerId` ו-`Amount`.
+את `VatAmount`, `Total` ו-`InvoiceNumber` ממלא WF1 תוך כדקה, ואת `PdfUrl`
 ממלא WF8 תוך דקה נוספת.
 
-כלומר: אחרי יצירת חשבונית, השורה תיראה חלקית למשך רגע. זו התנהגות תקינה.
-כדאי להוסיף לאפליקציה רענון אוטומטי כל 30 שניות במסך החשבוניות:
-
-```
-רענן את טבלת החשבוניות אוטומטית כל 30 שניות
-```
+כלומר אחרי יצירת חשבונית השורה נראית חלקית למשך רגע — זו התנהגות תקינה, ולכן
+הגדרתי רענון אוטומטי כל 30 שניות במסך החשבוניות.
 
 ---
 
 ## נעילת פלטפורמה
 
-מה שנבנה ב-Base44 אינו זהה למה שנבנה ב-Lovable. **החלק הנייד הוא הטבלאות
-וה-Webhook** — הממשק לא. אם תעברו פלטפורמה, שכבת הנתונים והלוגיקה נשארות
-בדיוק כפי שהן, ורק את המסכים בונים מחדש מאותו פרומט.
-
----
-
-## חלופה — `Dashboard.html`
-
-בתיקייה הזו יש גם דשבורד עצמאי בקובץ HTML אחד, שקורא ישירות מ-Airtable
-דרך ה-REST API. הוא שימושי לבדיקה מהירה בלי לפתוח את Base44.
-
-**⚠️ הוא דורש שתדביקו בו טוקן Airtable, ולכן הוא מיועד להרצה מקומית בלבד
-על המחשב שלכם. אל תעלו אותו לאינטרנט עם הטוקן בפנים** — זה בדיוק מה שהמערכת
-בנויה למנוע. האפליקציה האמיתית היא Base44 מול WF13.
+**החלק הנייד של המערכת הוא הטבלאות וה-Webhook** — לא הממשק. מעבר לפלטפורמת
+בנייה אחרת משאיר את שכבת הנתונים והלוגיקה כפי שהן, ודורש רק בנייה מחדש של
+המסכים מאותם שני פרומטים.
 
 </div>
