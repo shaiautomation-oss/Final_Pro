@@ -445,13 +445,7 @@
       ],
       "id": "03f3b44f-08ca-96dd-649a-4e1f7439b13d",
       "name": "המרה ל-PDF",
-      "credentials": {
-        "httpBasicAuth": {
-          "id": "PDFSHIFT_CREDENTIAL",
-          "name": "PDFShift"
-        }
-      },
-      "notes": "שלב 6 — שולח את ה-HTML ל-PDFShift ומקבל בחזרה קובץ PDF מרונדר, זהה לתצוגה בדפדפן.",
+      "notes": "שלב 6 — שולח את ה-HTML ל-PDFShift ומקבל PDF מרונדר. אימות: Basic Auth, שם משתמש api, סיסמה = מפתח ה-API.",
       "notesInFlow": true
     }
   ],
