@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="ERP-AI — מערכת ניהול עסק חכמה על n8n">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#0b1727"/>
+      <stop offset="55%" stop-color="#12314f"/>
+      <stop offset="100%" stop-color="#1f4e79"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#2dd4bf"/>
+      <stop offset="100%" stop-color="#5fa4dd"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.85" cy="0.1" r="0.6">
+      <stop offset="0%"   stop-color="#2dd4bf" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#2dd4bf" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity=".045" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <rect width="1200" height="320" fill="url(#grid)"/>
+  <rect width="1200" height="320" fill="url(#glow)"/>
+
+  <!-- קו מבטא עליון -->
+  <rect x="0" y="0" width="1200" height="5" fill="url(#accent)"/>
+
+  <!-- שרשרת צמתים דקורטיבית -->
+  <g stroke="#5fa4dd" stroke-opacity=".45" stroke-width="2" fill="none">
+    <path d="M905 205 H975 M1035 205 H1105"/>
+    <path d="M940 205 V150 H1070 V205"/>
+  </g>
+  <g fill="#0b1727" stroke="#2dd4bf" stroke-width="2.5">
+    <circle cx="905" cy="205" r="16"/>
+    <circle cx="1005" cy="205" r="16"/>
+    <circle cx="1105" cy="205" r="16"/>
+    <circle cx="1005" cy="150" r="16"/>
+  </g>
+  <g fill="#2dd4bf">
+    <circle cx="905" cy="205" r="4.5"/>
+    <circle cx="1005" cy="205" r="4.5"/>
+    <circle cx="1105" cy="205" r="4.5"/>
+    <circle cx="1005" cy="150" r="4.5"/>
+  </g>
+
+  <!-- כותרת -->
+  <text x="72" y="132" font-family="Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="76" font-weight="800" fill="#ffffff" letter-spacing="-2">ERP-AI</text>
+  <rect x="72" y="152" width="88" height="4" rx="2" fill="url(#accent)"/>
+
+  <text x="72" y="200" font-family="Segoe UI, Arial, sans-serif"
+        font-size="27" font-weight="600" fill="#dbe7f3">מערכת ניהול עסק חכמה על n8n</text>
+  <text x="72" y="236" font-family="Segoe UI, Arial, sans-serif"
+        font-size="17" fill="#8fb0cd">סוכני AI · RAG · Airtable · אפס שורות קוד</text>
+
+  <!-- מדדים -->
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <g transform="translate(72,264)">
+      <text font-size="25" font-weight="800" fill="#2dd4bf">10</text>
+      <text x="34" y="0" font-size="14" fill="#8fb0cd">אוטומציות</text>
+    </g>
+    <g transform="translate(215,264)">
+      <text font-size="25" font-weight="800" fill="#2dd4bf">98</text>
+      <text x="34" y="0" font-size="14" fill="#8fb0cd">צמתים</text>
+    </g>
+    <g transform="translate(335,264)">
+      <text font-size="25" font-weight="800" fill="#2dd4bf">3</text>
+      <text x="22" y="0" font-size="14" fill="#8fb0cd">סוכני AI</text>
+    </g>
+    <g transform="translate(455,264)">
+      <text font-size="25" font-weight="800" fill="#2dd4bf">0</text>
+      <text x="22" y="0" font-size="14" fill="#8fb0cd">צמתי קוד</text>
+    </g>
+  </g>
+</svg>
