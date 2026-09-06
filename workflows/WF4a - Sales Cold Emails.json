@@ -1,0 +1,513 @@
+{
+  "name": "WF4a - סוכן מכירות: מיילים קרים",
+  "nodes": [
+    {
+      "parameters": {
+        "color": 4,
+        "width": 700,
+        "height": 340,
+        "content": "## WF4a — סוכן מכירות: מיילים קרים\n**מה זה עושה:** כל 3 שעות שולף **ליד אחד** בסטטוס `New`, מבקש ממודל השפה לנסח מייל מכירה קר בעברית, שולח אותו בג'ימייל כ-HTML ומעדכן את סטטוס הליד ל-`Contacted`.\n\n**למה ליד אחד בלבד:** מגבלה מכוונת — כך טעות בהגדרה לא תשלח עשרות מיילים.\n\n**כללי הכתיבה שנאכפים בפרומט:** פנייה אישית בשם · עד שתי נקודות ערך · קריאה לפעולה אחת · עד 120 מילים · בלי הבטחות מחיר · בלי אימוג'ים.\n\n**אם השליחה נכשלת:** הליד מסומן `Email Failed` ויוצא מהתור, כדי שלא יקבל ניסיון חוזר בכל הרצה.\n\n**מה צריך:** חיבור Airtable, OpenAI ו-Gmail."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -352
+      ],
+      "id": "e90136f8-d27f-42be-4185-d5050a14e315",
+      "name": "פתק הסבר 1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        32
+      ],
+      "id": "7a67dcf7-f162-627d-1f61-d2a9801dce96",
+      "name": "כל 3 שעות",
+      "notes": "שלב 1 — מפעיל את התהליך כל שלוש שעות.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgCWOnLU1ZCJu9U",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblgCWOnLU1ZCJu9U"
+        },
+        "filterByFormula": "AND({Status}='New', {Email}!='')",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        32
+      ],
+      "id": "da398f53-7760-65e5-e37d-4ae1edf30469",
+      "name": "שליפת ליד חדש",
+      "notes": "שלב 2 — שולף ליד אחד בסטטוס New שיש לו כתובת מייל.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      },
+      "retryOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3ed19291-e1d0-010e-4c23-cf8d68440565",
+              "leftValue": "={{ ($json.fields || $json).Email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        32
+      ],
+      "id": "02aee0da-0a30-df6f-4663-4dffc15a0877",
+      "name": "האם נמצא ליד",
+      "notes": "שלב 3 — נמצא ליד לפנייה? אם אין — התהליך מסתיים בשקט.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ 'כתוב מייל מכירה קר, קצר וידידותי, בעברית תקנית, אל ליד עסקי בשם: ' + ($json.fields || $json).Name + ' (חברה: ' + (($json.fields || $json).Company || 'לא צוינה') + '). אנחנו איי.איי אלקטרוניקה (AI Electronics), קמעונאית אלקטרוניקה ישראלית שמוכרת אוזניות, מסכים, מקלדות, עכברים, רמקולים, מצלמות רשת ואביזרי מחשב, עם אחריות יבואן רשמי ומשלוח מהיר. כללים: פנייה אישית בשם; משפט פתיחה אחד שמסביר למה פנינו; שתי נקודות ערך לכל היותר; קריאה לפעולה אחת וברורה (השבה למייל הזה); עד 120 מילים; בלי הבטחות מחיר; בלי אימוג\\'ים; בלי נושא — רק גוף המייל; חתימה: צוות המכירות, איי.איי אלקטרוניקה.' }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        240,
+        -64
+      ],
+      "id": "d1cb3e50-836b-eb89-0834-7487e1b96287",
+      "name": "ניסוח מייל קר",
+      "notes": "שלב 4 — מודל השפה מנסח את גוף המייל בעברית, עד 120 מילים, עם קריאה לפעולה אחת.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        240,
+        144
+      ],
+      "id": "38eed2b8-c73e-2626-1e15-ccfe29cc1985",
+      "name": "מודל שפה",
+      "notes": "המוח: מודל OpenAI שמנסח את המייל.",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "VRZfZHjkqfq2tlyY",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ ($('שליפת ליד חדש').item.json.fields || $('שליפת ליד חדש').item.json).Email }}",
+        "subject": "הצעה מיוחדת מאיי.איי אלקטרוניקה",
+        "emailType": "html",
+        "message": "=<div dir=\"rtl\" style=\"font-family:Arial,'Segoe UI',Helvetica,sans-serif;font-size:15px;line-height:1.85;color:#1a1a1a;max-width:600px;margin:0 auto;padding:24px;\"><div style=\"font-size:19px;font-weight:bold;color:#1f4e79;border-bottom:3px solid #1f4e79;padding-bottom:10px;margin-bottom:20px;\">איי.איי אלקטרוניקה</div>{{ $json.text.trim().split(String.fromCharCode(10,10)).map(p => '<p style=\"margin:0 0 14px;\">' + p.trim().split(String.fromCharCode(10)).join('<br>') + '</p>').join('') }}<div style=\"margin-top:26px;padding-top:14px;border-top:1px solid #e2e8f0;font-size:12px;color:#777;line-height:1.7;\">איי.איי אלקטרוניקה בע\"מ · רח' הברזל 12, תל אביב<br>טלפון: 03-7654321 · info@ai-electronics.co.il</div></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        512,
+        -64
+      ],
+      "id": "599b4a6c-fd3b-5730-9bab-f11f53516922",
+      "name": "שליחת מייל",
+      "notes": "שלב 5 — שולח מייל HTML בעברית RTL לכתובת שבשדה Email, בלי חתימת n8n.",
+      "notesInFlow": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "q77xsPd2q3vBqVKi",
+          "name": "Gmail account"
+        }
+      },
+      "retryOnFail": true,
+      "onError": "continueErrorOutput",
+      "webhookId": "b0033b40-e2c4-42ea-9d68-09eee650e7a3"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgCWOnLU1ZCJu9U",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblgCWOnLU1ZCJu9U"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('שליפת ליד חדש').item.json.id }}",
+            "Status": "Contacted"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        -160
+      ],
+      "id": "338a4d6b-045d-6895-8d91-2a6e81198544",
+      "name": "סימון נשלח מייל",
+      "notes": "שלב 6 — מעדכן את הליד לסטטוס Contacted כדי שלא יקבל מייל נוסף.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgCWOnLU1ZCJu9U",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblgCWOnLU1ZCJu9U"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('שליפת ליד חדש').item.json.id }}",
+            "Status": "Email Failed"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        64
+      ],
+      "id": "235062bb-e79e-6527-d867-1c858e4753cd",
+      "name": "סימון שליחה נכשלה",
+      "notes": "שלב 6ב — אם שליחת המייל נכשלה (כתובת שגויה למשל), הליד מסומן Email Failed ולא יילקח שוב.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "כל 3 שעות": {
+      "main": [
+        [
+          {
+            "node": "שליפת ליד חדש",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "שליפת ליד חדש": {
+      "main": [
+        [
+          {
+            "node": "האם נמצא ליד",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "האם נמצא ליד": {
+      "main": [
+        [
+          {
+            "node": "ניסוח מייל קר",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ניסוח מייל קר": {
+      "main": [
+        [
+          {
+            "node": "שליחת מייל",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "שליחת מייל": {
+      "main": [
+        [
+          {
+            "node": "סימון נשלח מייל",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "סימון שליחה נכשלה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "מודל שפה": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "ניסוח מייל קר",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8adec2ce-9cf5-922f-0e0f-4ea306ef2caf",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "ERPAI004AWF4AAAA",
+  "tags": []
+}

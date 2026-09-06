@@ -1,0 +1,516 @@
+{
+  "name": "WF9 - סוכן המנהל",
+  "nodes": [
+    {
+      "parameters": {
+        "color": 3,
+        "width": 760,
+        "height": 372,
+        "content": "## WF9 — סוכן המנהל (בוט טלגרם #1)\n**מה זה עושה:** בעל העסק שואל בטלגרם \"מה ההכנסות?\", המערכת מחשבת את המספרים בצמתים מוכנים (Summarize) ומעבירה אותם לסוכן — שרק מנסח את התשובה בעברית. כך אין לסוכן מקום להמציא מספרים.\n\n### בקרת הרשאות\nהצומת **`האם זה הבעלים`** משווה את מזהה הצ'אט של הפונה למזהה של הבעלים. בהתקנה חדשה יש להזין שם את המזהה במקום הערך הזמני `000000000`; אפשר לקרוא אותו מהפלט של `הודעה מהמנהל`, בשדה `message.chat.id`.\nכל עוד המזהה לא הוזן, התנאי אינו מתקיים לאף אחד וכל פנייה נחסמת — ברירת המחדל היא לחסום.\n\n**מגבלה מכוונת:** לסוכן אין כלים והוא רואה עד 100 חשבוניות."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -400
+      ],
+      "id": "07f29bd0-ddfe-b8fc-8aea-d92d3996a512",
+      "name": "פתק הסבר 1"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -912,
+        96
+      ],
+      "id": "1a4f7d15-6911-6f89-7d98-e75e99d7ea0e",
+      "name": "הודעה מהמנהל",
+      "notes": "שלב 1 — מקבל הודעה בבוט המנהל (בוט #1).",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_MANAGER_BOT",
+          "name": "Telegram - בוט מנהל"
+        }
+      },
+      "webhookId": "d9d9d9d9-4e4e-4e4e-8e4e-9e9e9e9e9e09"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bd87e36f-f258-470c-3d8b-fa6781a74b71",
+              "leftValue": "={{ $json.message.chat.id.toString() }}",
+              "rightValue": "000000000",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -672,
+        96
+      ],
+      "id": "aba8604e-39ea-357f-64c1-56b6f6ba9e36",
+      "name": "האם זה הבעלים",
+      "notes": "שלב 2 — ⚠️ החליפו את 000000000 ב-Chat ID של הבעלים. רק הוא רואה נתונים.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "returnAll": false,
+        "limit": 100,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -432,
+        -16
+      ],
+      "id": "58bd2497-fb14-eda7-952e-ddc4ce062005",
+      "name": "קריאת חשבוניות",
+      "notes": "שלב 3 — קורא עד 100 חשבוניות מהטבלה.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "Total"
+            },
+            {
+              "aggregation": "sum",
+              "field": "Amount"
+            },
+            {
+              "aggregation": "sum",
+              "field": "VatAmount"
+            },
+            {
+              "aggregation": "count",
+              "field": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "1e206046-9a57-14e3-613d-c28f97e6f6ca",
+      "name": "סיכום כללי",
+      "notes": "שלב 4 — מחשב סך הכנסות, סך לפני מע\"מ, סך מע\"מ ומספר חשבוניות — בלי שורת קוד.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "filterByFormula": "NOT({Status}='Paid')",
+        "returnAll": false,
+        "limit": 100,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        -16
+      ],
+      "id": "a0eea78f-1504-904c-84c8-5ecac40a5cc2",
+      "name": "קריאת מה שלא שולם",
+      "notes": "שלב 5 — קורא רק את החשבוניות שטרם שולמו.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "Total"
+            },
+            {
+              "aggregation": "count",
+              "field": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "b1a6eb41-73c2-5601-e6ec-371df5089dc7",
+      "name": "סיכום שלא שולם",
+      "notes": "שלב 6 — מחשב את הסכום שטרם שולם ואת מספר החשבוניות הפתוחות.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=שאלת הבעלים: {{ $('הודעה מהמנהל').item.json.message.text }}\n\nנתוני העסק שחושבו עכשיו מתוך Airtable (אלה המספרים היחידים שמותר לך להשתמש בהם):\n- מספר חשבוניות במערכת: {{ $('סיכום כללי').item.json.count_id }}\n- סך הכנסות כולל מע\"מ: {{ $('סיכום כללי').item.json.sum_Total }} ש\"ח\n- סך הכנסות לפני מע\"מ: {{ $('סיכום כללי').item.json.sum_Amount }} ש\"ח\n- סך המע\"מ שנגבה: {{ $('סיכום כללי').item.json.sum_VatAmount }} ש\"ח\n- מספר חשבוניות שטרם שולמו: {{ $json.count_id }}\n- סכום שטרם שולם: {{ $json.sum_Total }} ש\"ח",
+        "options": {
+          "systemMessage": "אתה עוזר האנליטיקה האישי של בעל העסק באיי.איי אלקטרוניקה. אתה מדבר איתו בטלגרם.\n\nכללי עבודה:\n1. ענה בעברית, קצר ולעניין — 2 עד 5 שורות. בלי הקדמות ובלי \"שאלה מצוינת\".\n2. כל המספרים שאתה צריך כבר חושבו עבורך והם מופיעים בהודעה. השתמש אך ורק בהם — אל תחשב מחדש ואל תמציא מספרים.\n3. סכומים בשקלים, עם הפרדת אלפים, מעוגלים לשקל שלם.\n4. אם השאלה אינה קשורה לנתונים שקיבלת — אמור שאין לך את הנתון הזה במערכת ופרט אילו נתונים כן זמינים לך (הכנסות, מספר חשבוניות, יתרות שלא שולמו).\n5. אין לך כלים ואינך יכול ליצור, לעדכן או למחוק רשומות. אם מבקשים ממך לעשות פעולה — אמור שזה מתבצע באפליקציית הניהול.\n6. הוסף שורת תובנה אחת בסוף רק אם היא באמת נובעת מהמספרים.",
+          "maxIterations": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        528,
+        -16
+      ],
+      "id": "cbda6322-2a84-a8d2-7b4b-6c5adc9225af",
+      "name": "סוכן המנהל",
+      "notes": "שלב 7 — הסוכן מקבל את המספרים המחושבים ורק מנסח מהם תשובה בעברית.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        432,
+        224
+      ],
+      "id": "8b5f3a6f-ade3-8bc3-b487-a9066cd4671e",
+      "name": "מודל שפה",
+      "notes": "המוח: מודל OpenAI. טמפרטורה נמוכה — ניסוח יבש ומדויק.",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "VRZfZHjkqfq2tlyY",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('הודעה מהמנהל').item.json.message.chat.id }}",
+        "contextWindowLength": 6
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        224
+      ],
+      "id": "39bac289-7139-a9f5-a8b3-eefb0176eba8",
+      "name": "זיכרון שיחה",
+      "notes": "זיכרון שיחה קצר, כדי שאפשר יהיה לשאול שאלת המשך.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('הודעה מהמנהל').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        816,
+        -16
+      ],
+      "id": "810ef182-e0e3-13c0-22d8-16eb3c8fe54c",
+      "name": "שליחת תשובה למנהל",
+      "notes": "שלב 8 — שולח את התשובה לבעלים בטלגרם.",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_MANAGER_BOT",
+          "name": "Telegram - בוט מנהל"
+        }
+      },
+      "webhookId": "d9d9d9d9-4e4e-4e4e-8e4e-9e9e9e9e9e10"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "הבוט הזה מיועד לבעל העסק בלבד. לשאלות שירות אנא פנו לבוט הלקוחות שלנו.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -432,
+        224
+      ],
+      "id": "b7cb3233-cd33-ba04-dd7c-942779791e2d",
+      "name": "סירוב גישה",
+      "notes": "שלב 2ב — כל מי שאינו הבעלים מקבל סירוב מנומס ולא רואה נתונים.",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_MANAGER_BOT",
+          "name": "Telegram - בוט מנהל"
+        }
+      },
+      "webhookId": "d9d9d9d9-4e4e-4e4e-8e4e-9e9e9e9e9e11"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify(Object.assign({ id: $json.id }, $json.fields || $json)) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -312,
+        -16
+      ],
+      "id": "5fa1f506-de8b-0607-a29d-7ae0ccda006c",
+      "name": "שיטוח חשבוניות",
+      "notes": "משטח את השדות מתוך fields, כדי שצומת Summarize יוכל לסכם אותם.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify(Object.assign({ id: $json.id }, $json.fields || $json)) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        168,
+        -16
+      ],
+      "id": "b33ea750-9429-afd2-1d0b-5ce687dbcb91",
+      "name": "שיטוח מה שלא שולם",
+      "notes": "משטח את השדות מתוך fields, כדי שצומת Summarize יוכל לסכם אותם.",
+      "notesInFlow": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "הודעה מהמנהל": {
+      "main": [
+        [
+          {
+            "node": "האם זה הבעלים",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "האם זה הבעלים": {
+      "main": [
+        [
+          {
+            "node": "קריאת חשבוניות",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "סירוב גישה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "קריאת חשבוניות": {
+      "main": [
+        [
+          {
+            "node": "שיטוח חשבוניות",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "סיכום כללי": {
+      "main": [
+        [
+          {
+            "node": "קריאת מה שלא שולם",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "קריאת מה שלא שולם": {
+      "main": [
+        [
+          {
+            "node": "שיטוח מה שלא שולם",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "סיכום שלא שולם": {
+      "main": [
+        [
+          {
+            "node": "סוכן המנהל",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "סוכן המנהל": {
+      "main": [
+        [
+          {
+            "node": "שליחת תשובה למנהל",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "מודל שפה": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "סוכן המנהל",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "זיכרון שיחה": {
+      "ai_memory": [
+        [
+          {
+            "node": "סוכן המנהל",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "שיטוח חשבוניות": {
+      "main": [
+        [
+          {
+            "node": "סיכום כללי",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "שיטוח מה שלא שולם": {
+      "main": [
+        [
+          {
+            "node": "סיכום שלא שולם",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "deda4a61-da1c-f089-1edd-5c6d54bea087",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "ERPAI0009WF9AAAA",
+  "tags": []
+}

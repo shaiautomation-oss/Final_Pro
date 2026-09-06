@@ -1,0 +1,19 @@
+# ── סודות — לעולם לא לעלות ──
+*.token
+*.secret
+.env
+.env.*
+airtable.txt
+credentials*.txt
+tokens*.txt
+*-token.txt
+secrets/
+
+# ── מקומי ──
+.cache/
+.tmp/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini

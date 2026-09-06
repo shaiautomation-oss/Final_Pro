@@ -1,0 +1,773 @@
+{
+  "name": "WF1 - אימות מסמכי מס",
+  "nodes": [
+    {
+      "parameters": {
+        "color": 4,
+        "width": 660,
+        "height": 300,
+        "content": "## WF1 — אימות מסמכי מס והכנסתם לתור הפקה\n**מה זה עושה:** בכל דקה בודק אם נוספה חשבונית חדשה בטבלת `Invoices`, מוודא שיש בה סכום ולקוח, מחשב מע\"מ לפי הדין הישראלי, מקצה מספר מסמך רץ ומסמן אותה `Ready` — כלומר בתור להפקת המסמך ב-WF8.\n\n**מה צריך:** חיבור Airtable אחד בלבד.\n\n**טריגר:** Airtable Trigger + המתנה על השדה `Created` (חייב להיות מסוג Created time).\n\n**בהתקנה חדשה:** בכל צומת Airtable יש לבחור מחדש את הבסיס, את הטבלה ואת ה-Credential."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -320
+      ],
+      "id": "9c90a4fa-db03-98e4-e280-9686e8f2e974",
+      "name": "פתק הסבר 1"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "baseId": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "triggerField": "Created",
+        "additionalFields": {},
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        32
+      ],
+      "id": "af9fddb2-9ba4-94f1-1b83-7798eebd9f27",
+      "name": "חשבונית חדשה",
+      "notes": "שלב 1 — מזהה חשבונית חדשה בטבלת Invoices (סריקה כל דקה לפי השדה Created).",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "46af341d-65c7-9d3e-dced-e78987c58e9a",
+              "leftValue": "={{ $json.fields.Amount }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "7d3df08d-7096-64fc-f015-57d2d05b1980",
+              "leftValue": "={{ $json.fields.CustomerId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -370,
+        32
+      ],
+      "id": "769ee109-c13c-ff5b-4389-f1f51998c0c7",
+      "name": "בדיקת תקינות",
+      "notes": "שלב 4 — אימות: יש סכום גדול מאפס ויש מזהה לקוח? כן → ממשיכים. לא → מסומנת פסולה.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "returnAll": true,
+        "options": {
+          "fields": [
+            "InvoiceNumber"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -98,
+        -96
+      ],
+      "id": "d53e4079-ee08-b2ba-bbd5-19bb07483142",
+      "name": "קריאת כל החשבוניות",
+      "notes": "שלב 5 — קורא את כל החשבוניות הקיימות כדי לדעת מה המספר הרץ הבא.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "count",
+              "field": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        126,
+        -96
+      ],
+      "id": "b251f8e9-c58f-1450-07bd-c998de29d7a2",
+      "name": "ספירת חשבוניות",
+      "notes": "שלב 6 — סופר כמה חשבוניות קיימות — כולל זו שנוצרה עכשיו. הספירה עצמה היא המספר הרץ.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d41f0c73-f9b4-a319-0faa-b68da0c21e72",
+              "name": "recordId",
+              "value": "={{ $('חשבונית חדשה').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "1c6bddb6-ee78-b359-e58f-a910f6b05fb5",
+              "name": "VatRate",
+              "value": "={{ new Date($('קריאת החשבונית מחדש').item.json.fields.Created) >= new Date('2025-01-01') ? 0.18 : 0.17 }}",
+              "type": "number"
+            },
+            {
+              "id": "633cce79-baa6-9fa6-b32f-d0013df675d9",
+              "name": "VatAmount",
+              "value": "={{ Math.round($('קריאת החשבונית מחדש').item.json.fields.Amount * (new Date($('קריאת החשבונית מחדש').item.json.fields.Created) >= new Date('2025-01-01') ? 0.18 : 0.17) * 100) / 100 }}",
+              "type": "number"
+            },
+            {
+              "id": "532cab1b-df35-37d7-34cd-0a7de21a1644",
+              "name": "Total",
+              "value": "={{ Math.round(($('קריאת החשבונית מחדש').item.json.fields.Amount + $('קריאת החשבונית מחדש').item.json.fields.Amount * (new Date($('קריאת החשבונית מחדש').item.json.fields.Created) >= new Date('2025-01-01') ? 0.18 : 0.17)) * 100) / 100 }}",
+              "type": "number"
+            },
+            {
+              "id": "f06bf51c-01a5-1c35-9039-bbeec260dfe7",
+              "name": "InvoiceNumber",
+              "value": "={{ $('קריאת החשבונית מחדש').item.json.fields.InvoiceNumber || ('INV-' + new Date().getFullYear() + '-' + String($json.count_id).padStart(4,'0')) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        350,
+        -96
+      ],
+      "id": "37009ebd-097f-29ea-1cb5-877c73bbf70d",
+      "name": "חישוב מעמ ומספר מסמך",
+      "notes": "שלב 7 — מחשב מע\"מ (18% מ-01/01/2025, 17% לפני כן), סכום כולל ומספר מסמך רץ — הכל בעריכת שדות.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.recordId }}",
+            "InvoiceNumber": "={{ $json.InvoiceNumber }}",
+            "VatAmount": "={{ $json.VatAmount }}",
+            "Total": "={{ $json.Total }}",
+            "Status": "Ready"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "InvoiceNumber",
+              "displayName": "InvoiceNumber",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "CustomerId",
+              "displayName": "CustomerId",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "VatAmount",
+              "displayName": "VatAmount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "PdfUrl",
+              "displayName": "PdfUrl",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        606,
+        -96
+      ],
+      "id": "0a4ac93d-638b-1dfd-34b9-55040fb81179",
+      "name": "עדכון והכנסה לתור",
+      "notes": "שלב 8 — כותב מע\"מ, סכום כולל ומספר מסמך, ומסמן Status = Ready → תור ההפקה של WF8.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Invalid"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "InvoiceNumber",
+              "displayName": "InvoiceNumber",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "CustomerId",
+              "displayName": "CustomerId",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "VatAmount",
+              "displayName": "VatAmount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "PdfUrl",
+              "displayName": "PdfUrl",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -98,
+        208
+      ],
+      "id": "c2be7a56-3272-263f-b4e7-817968fbe4d9",
+      "name": "סימון כפסולה",
+      "notes": "שלב 9א — חשבונית שלא עברה אימות מסומנת Invalid ואינה נכנסת לתור ההפקה.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblJzJnQf8MFXsEPS",
+          "mode": "list",
+          "cachedResultName": "Tasks",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblJzJnQf8MFXsEPS"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ 'לתקן חשבונית פסולה: ' + ($('קריאת החשבונית מחדש').item.json.fields.InvoiceNumber || $('חשבונית חדשה').item.json.id) + ' — חסר סכום או מזהה לקוח' }}",
+            "Status": "Open"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        126,
+        208
+      ],
+      "id": "4033f03e-211e-d171-e312-28f13dbd26e9",
+      "name": "פתיחת משימת תיקון",
+      "notes": "שלב 9ב — פותח משימה בטבלת Tasks כדי שבעל העסק יראה שיש חשבונית לתקן.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 90,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -688,
+        32
+      ],
+      "id": "76ec8437-9ebb-97b4-9d30-b2f62708a550",
+      "name": "המתנה לסיום ההקלדה",
+      "webhookId": "50017e18-e7df-2e05-d1b0-c23959fcf6cf",
+      "notes": "שלב 2 — ממתין 90 שניות. ב-Airtable הרשומה נוצרת ברגע הלחיצה על +, לפני שהוקלדו הסכום והלקוח.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "get",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "id": "={{ $('חשבונית חדשה').item.json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        32
+      ],
+      "id": "bdcfbf27-7208-0b59-a130-0e60564a23cf",
+      "name": "קריאת החשבונית מחדש",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      },
+      "notes": "שלב 3 — קורא את הרשומה מחדש. נתוני הטריגר הם תצלום מרגע היצירה ולכן מיושנים.",
+      "notesInFlow": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "חשבונית חדשה": {
+      "main": [
+        [
+          {
+            "node": "המתנה לסיום ההקלדה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "בדיקת תקינות": {
+      "main": [
+        [
+          {
+            "node": "קריאת כל החשבוניות",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "סימון כפסולה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "קריאת כל החשבוניות": {
+      "main": [
+        [
+          {
+            "node": "ספירת חשבוניות",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ספירת חשבוניות": {
+      "main": [
+        [
+          {
+            "node": "חישוב מעמ ומספר מסמך",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "חישוב מעמ ומספר מסמך": {
+      "main": [
+        [
+          {
+            "node": "עדכון והכנסה לתור",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "סימון כפסולה": {
+      "main": [
+        [
+          {
+            "node": "פתיחת משימת תיקון",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "המתנה לסיום ההקלדה": {
+      "main": [
+        [
+          {
+            "node": "קריאת החשבונית מחדש",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "קריאת החשבונית מחדש": {
+      "main": [
+        [
+          {
+            "node": "בדיקת תקינות",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "44e1627d-91c8-ebf8-e02f-d25011ceaa13",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "ERPAI0001WF1AAAA",
+  "tags": []
+}

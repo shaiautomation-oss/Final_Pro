@@ -1,0 +1,383 @@
+{
+  "name": "WF4b - סוכן מכירות: בדיקת תשובות",
+  "nodes": [
+    {
+      "parameters": {
+        "color": 4,
+        "width": 700,
+        "height": 300,
+        "content": "## WF4b — סוכן מכירות: בדיקת תשובות\n**מה זה עושה:** כל 30 דקות בודק בג'ימייל אם הגיעו מיילים חדשים. לכל מייל נכנס הוא מחלץ את כתובת השולח, מחפש אותה בטבלת `Leads`, ואם זו כתובת של ליד שכבר פנינו אליו — מעדכן את הסטטוס ל-`Replied` ושולח התראה לבוט המנהל בטלגרם.\n\n**מה צריך:** חיבור Gmail, חיבור Airtable, וחיבור טלגרם של **בוט המנהל**.\n\n**Chat ID:** בצומת `התראה למנהל` מוזן מזהה הצ'אט של הבעלים — אותו ערך שב-WF9.\n\n**שימו לב:** מיילים שאינם מלידים פשוט לא נכנסים לענף העדכון — זה תקין."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -352
+      ],
+      "id": "8bf74dfa-005c-5c39-63bd-2cb45367299d",
+      "name": "פתק הסבר 1"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 30,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "simple": true,
+        "filters": {
+          "q": "in:inbox -from:me"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        32
+      ],
+      "id": "830ca61b-fa3b-ab88-26e2-938e6149e339",
+      "name": "מייל נכנס",
+      "notes": "שלב 1 — בודק כל 30 דקות מיילים חדשים בתיבה בלבד (in:inbox), ומתעלם ממיילים שאנחנו שלחנו.",
+      "notesInFlow": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "q77xsPd2q3vBqVKi",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b41ea5cd-c79a-569d-dd98-be367b0803a5",
+              "name": "senderEmail",
+              "value": "={{ String($json.From || $json.from || '').indexOf('<') >= 0 ? String($json.From || $json.from || '').split('<')[1].split('>')[0].trim().toLowerCase() : String($json.From || $json.from || '').trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "9c30be83-85d0-a60b-b105-2a1ca3b1eb0a",
+              "name": "subject",
+              "value": "={{ $json.Subject || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "4291e79c-625a-ae43-02bc-071330419b93",
+              "name": "snippet",
+              "value": "={{ ($json.snippet || '').slice(0, 300) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -256,
+        32
+      ],
+      "id": "4b3254dc-8426-9912-811f-7aec63fd450d",
+      "name": "חילוץ כתובת השולח",
+      "notes": "שלב 2 — מחלץ מתוך שדה From רק את כתובת המייל הנקייה (בלי שם השולח).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgCWOnLU1ZCJu9U",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblgCWOnLU1ZCJu9U"
+        },
+        "filterByFormula": "=LOWER({Email})=\"{{ $json.senderEmail }}\"",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        32
+      ],
+      "id": "ded39106-feb4-552c-58c5-8d309786b209",
+      "name": "איתור ליד לפי מייל",
+      "notes": "שלב 3 — מחפש בטבלת Leads ליד עם אותה כתובת מייל.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a7eb1e3a-b86a-2fd2-5162-c2b6ff5ac190",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        32
+      ],
+      "id": "eb74210f-8382-fe40-9a7d-014c01ac3a0e",
+      "name": "האם ליד מוכר",
+      "notes": "שלב 4 — האם השולח הוא ליד מוכר? רק אז ממשיכים.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgCWOnLU1ZCJu9U",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblgCWOnLU1ZCJu9U"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Replied"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        -64
+      ],
+      "id": "f7de2665-fc29-71a9-887d-3597263ce86f",
+      "name": "סימון השיב",
+      "notes": "שלב 5 — מעדכן את סטטוס הליד ל-Replied. מכאן הטיפול עובר לאדם.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "000000000",
+        "text": "={{ 'ליד ענה למייל!\\n\\nשם: ' + ($json.fields || $json).Name + '\\nמייל: ' + ($json.fields || $json).Email + '\\nחברה: ' + (($json.fields || $json).Company || '-') + '\\nנושא ההודעה: ' + $('חילוץ כתובת השולח').item.json.subject }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        -64
+      ],
+      "id": "73b0a7f7-3b9e-6b1c-7703-42e92a09e2f7",
+      "name": "התראה למנהל",
+      "notes": "שלב 6 — ⚠️ החליפו את 000000000 ב-Chat ID של הבעלים (אותו ערך כמו ב-WF9).",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_MANAGER_BOT",
+          "name": "Telegram - בוט מנהל"
+        }
+      },
+      "webhookId": "a1b2c3d4-4b4b-4b4b-8b4b-4b4b4b4b4b01"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "מייל נכנס": {
+      "main": [
+        [
+          {
+            "node": "חילוץ כתובת השולח",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "חילוץ כתובת השולח": {
+      "main": [
+        [
+          {
+            "node": "איתור ליד לפי מייל",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "איתור ליד לפי מייל": {
+      "main": [
+        [
+          {
+            "node": "האם ליד מוכר",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "האם ליד מוכר": {
+      "main": [
+        [
+          {
+            "node": "סימון השיב",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "סימון השיב": {
+      "main": [
+        [
+          {
+            "node": "התראה למנהל",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "cc304d10-7c16-efda-5c94-e3f6bb0f9569",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "ERPAI004BWF4BAAA",
+  "tags": []
+}

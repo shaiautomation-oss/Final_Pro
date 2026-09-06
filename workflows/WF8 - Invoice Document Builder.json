@@ -1,0 +1,537 @@
+{
+  "name": "WF8 - הפקת מסמך חשבונית",
+  "nodes": [
+    {
+      "parameters": {
+        "color": 5,
+        "width": 720,
+        "height": 340,
+        "content": "## WF8 — הפקת מסמך חשבונית והעלאה לגוגל דרייב\n**מה זה עושה:** כל דקה מחפש חשבונית אחת בסטטוס `Ready` שעדיין אין לה מסמך, ממלא את תבנית ה-HTML בעברית RTL בנתוני החשבונית, הופך אותה לקובץ, מעלה לגוגל דרייב ושומר את הקישור בשדה `PdfUrl` — ואז מסמן `Issued`.\n\n**התבנית** יושבת בצומת `בניית HTML`, בשדה `html`.\n\n**למה HTML ולא PDF:** כדי לא להקים שירות המרה חיצוני. ההמרה ל-PDF היא ידנית: בדרייב → קליק ימני → פתיחה באמצעות Google Docs → File → Download → PDF.\n\n**מה צריך:** חיבור Airtable וחיבור Google Drive."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -368
+      ],
+      "id": "b34e1ac8-419b-966c-8d35-133cffbfd533",
+      "name": "פתק הסבר 1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -832,
+        48
+      ],
+      "id": "2c4c7689-b0b5-4eab-9470-f54061dddf41",
+      "name": "כל דקה",
+      "notes": "שלב 1 — סורק את תור ההפקה כל דקה.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "filterByFormula": "AND({Status}='Ready', {PdfUrl}='')",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -592,
+        48
+      ],
+      "id": "b70628ce-656a-b4b2-9e7e-3df701c6aac3",
+      "name": "איתור חשבונית בתור",
+      "notes": "שלב 2 — מוצא חשבונית אחת שאושרה ב-WF1 ועדיין אין לה מסמך.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b5be5824-4c29-1b4f-c000-ae319ba756c0",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -352,
+        48
+      ],
+      "id": "ceb6b710-b02e-f59e-7b79-6968a216ca61",
+      "name": "האם יש חשבונית",
+      "notes": "שלב 3 — אין חשבונית בתור? התהליך מסתיים בשקט עד הסריקה הבאה.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "380be9b0-60d0-05e2-dd26-fece0195ddf1",
+              "name": "recordId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "eccf0167-3416-2be4-6250-69fde8c58f24",
+              "name": "InvoiceNumber",
+              "value": "={{ ($json.fields || $json).InvoiceNumber }}",
+              "type": "string"
+            },
+            {
+              "id": "762692ed-5bb8-c426-aae5-c01856ed82af",
+              "name": "CustomerId",
+              "value": "={{ ($json.fields || $json).CustomerId }}",
+              "type": "string"
+            },
+            {
+              "id": "29e7b71a-1e2e-8ba2-c059-9a9f8b8eba9c",
+              "name": "IssueDate",
+              "value": "={{ new Date(($json.fields || $json).Created).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}",
+              "type": "string"
+            },
+            {
+              "id": "d523731f-e0f1-b11b-5bad-b43ad3c02a6b",
+              "name": "VatPercent",
+              "value": "={{ Math.round((($json.fields || $json).VatAmount / ($json.fields || $json).Amount) * 100) }}",
+              "type": "number"
+            },
+            {
+              "id": "07513cfb-8547-492c-d69f-06c4effd488f",
+              "name": "AmountFmt",
+              "value": "={{ Number(($json.fields || $json).Amount).toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}",
+              "type": "string"
+            },
+            {
+              "id": "210c1509-0e89-c9ef-dd64-96ae99ee1bc1",
+              "name": "VatFmt",
+              "value": "={{ Number(($json.fields || $json).VatAmount).toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}",
+              "type": "string"
+            },
+            {
+              "id": "e0dcbe01-5c26-a7ff-fa09-ab12ecf82319",
+              "name": "TotalFmt",
+              "value": "={{ Number(($json.fields || $json).Total).toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}",
+              "type": "string"
+            },
+            {
+              "id": "6812c7f2-fa89-0cef-de33-71f228eef158",
+              "name": "PayStatus",
+              "value": "טרם שולם",
+              "type": "string"
+            },
+            {
+              "id": "6272653a-eddd-2a26-4c65-5afc94f120a0",
+              "name": "fileName",
+              "value": "={{ ($json.fields || $json).InvoiceNumber + '.html' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        -48
+      ],
+      "id": "98bdd02b-3877-a1c3-2fc2-e2821c762627",
+      "name": "הכנת נתוני המסמך",
+      "notes": "שלב 4 — מכין את שדות המסמך: תאריך בפורמט ישראלי, אחוז מע\"מ, וסכומים עם הפרדת אלפים.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e08df1f-e3d7-56bc-f71e-76f2816a5771",
+              "name": "html",
+              "value": "=<!DOCTYPE html>\n<html lang=\"he\" dir=\"rtl\">\n<head>\n<meta charset=\"utf-8\">\n<title>חשבונית מס {{ ($json.fields || $json).InvoiceNumber }}</title>\n<style>\nbody { font-family: Arial, 'Segoe UI', sans-serif; direction: rtl; margin: 0; padding: 32px; color: #1a1a1a; background: #fff; }\n.doc { max-width: 760px; margin: 0 auto; border: 1px solid #dcdcdc; padding: 32px; }\n.head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1f4e79; padding-bottom: 16px; }\n.biz-name { font-size: 24px; font-weight: bold; color: #1f4e79; margin: 0 0 6px; }\n.biz-meta { font-size: 13px; color: #555; line-height: 1.7; }\n.doc-title { font-size: 20px; font-weight: bold; text-align: left; }\n.doc-num { font-size: 15px; color: #1f4e79; text-align: left; margin-top: 6px; }\n.section { margin-top: 26px; }\n.label { font-size: 12px; color: #777; letter-spacing: .5px; }\n.value { font-size: 15px; font-weight: bold; }\ntable { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14px; }\nth { background: #1f4e79; color: #fff; text-align: right; padding: 10px 12px; font-weight: normal; }\ntd { border-bottom: 1px solid #eee; padding: 10px 12px; }\n.num { text-align: left; font-variant-numeric: tabular-nums; }\n.totals { margin-top: 18px; margin-right: auto; width: 320px; font-size: 14px; }\n.totals div { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eee; }\n.grand { font-size: 18px; font-weight: bold; color: #1f4e79; border-bottom: 3px double #1f4e79; }\n.foot { margin-top: 34px; font-size: 12px; color: #777; line-height: 1.8; border-top: 1px solid #eee; padding-top: 14px; }\n.stamp { display: inline-block; margin-top: 10px; padding: 5px 12px; border: 2px solid #1f4e79; color: #1f4e79; font-size: 12px; font-weight: bold; }\n</style>\n</head>\n<body>\n<div class=\"doc\">\n  <div class=\"head\">\n    <div>\n      <p class=\"biz-name\">איי.איי אלקטרוניקה בע\"מ</p>\n      <div class=\"biz-meta\">\n        ח.פ. 515123456 · עוסק מורשה<br>\n        רח' הברזל 12, תל אביב<br>\n        טלפון: 03-7654321 · info@ai-electronics.co.il\n      </div>\n    </div>\n    <div>\n      <div class=\"doc-title\">חשבונית מס</div>\n      <div class=\"doc-num\">מספר: {{ ($json.fields || $json).InvoiceNumber }}</div>\n      <div class=\"doc-num\">תאריך: {{ $json.IssueDate }}</div>\n    </div>\n  </div>\n\n  <div class=\"section\">\n    <div class=\"label\">לכבוד</div>\n    <div class=\"value\">{{ ($json.fields || $json).CustomerId }}</div>\n  </div>\n\n  <div class=\"section\">\n    <table>\n      <tr><th>תיאור</th><th class=\"num\">כמות</th><th class=\"num\">מחיר לפני מע\"מ</th><th class=\"num\">סה\"כ</th></tr>\n      <tr>\n        <td>אספקת מוצרים ושירותים — הזמנה {{ ($json.fields || $json).InvoiceNumber }}</td>\n        <td class=\"num\">1</td>\n        <td class=\"num\">{{ $json.AmountFmt }} ₪</td>\n        <td class=\"num\">{{ $json.AmountFmt }} ₪</td>\n      </tr>\n    </table>\n  </div>\n\n  <div class=\"totals\">\n    <div><span>סכום לפני מע\"מ</span><span class=\"num\">{{ $json.AmountFmt }} ₪</span></div>\n    <div><span>מע\"מ {{ $json.VatPercent }}%</span><span class=\"num\">{{ $json.VatFmt }} ₪</span></div>\n    <div class=\"grand\"><span>סה\"כ לתשלום</span><span class=\"num\">{{ $json.TotalFmt }} ₪</span></div>\n  </div>\n\n  <div class=\"foot\">\n    מסמך זה הופק ממערכת ממוחשבת. סטטוס תשלום: {{ $json.PayStatus }}.<br>\n    מע\"מ בשיעור {{ $json.VatPercent }}% בהתאם לשיעור החוקי במועד העסקה (18% החל מ-01/01/2025, 17% לפני כן).<br>\n    יש לשמור מסמך זה לצורכי דיווח לרשויות המס.\n    <div class=\"stamp\">מקור</div>\n  </div>\n</div>\n</body>\n</html>\n",
+              "type": "string"
+            },
+            {
+              "id": "1aca5f8a-3aea-8214-5834-95d767eee6a2",
+              "name": "fileName",
+              "value": "={{ $json.fileName }}",
+              "type": "string"
+            },
+            {
+              "id": "ed565e1e-6f76-efbc-7349-4d19b5b7237b",
+              "name": "recordId",
+              "value": "={{ $json.recordId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        -48
+      ],
+      "id": "5feb019f-197f-8132-9868-87591b999104",
+      "name": "בניית HTML",
+      "notes": "שלב 5 — כאן יושבת תבנית החשבונית בעברית RTL. לעריכת המסמך — פתחו את השדה html.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "html",
+        "options": {
+          "fileName": "={{ $json.fileName }}",
+          "mimeType": "text/html",
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        -48
+      ],
+      "id": "412228f2-ad29-a8b3-4660-010161e9edd5",
+      "name": "המרה לקובץ",
+      "notes": "שלב 6 — הופך את ה-HTML לקובץ בינארי מוכן להעלאה.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "name": "={{ $('בניית HTML').item.json.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        608,
+        -48
+      ],
+      "id": "852c4240-8efb-94bb-0f73-268019d28cd8",
+      "name": "העלאה לגוגל דרייב",
+      "notes": "שלב 7 — מעלה את המסמך לגוגל דרייב. אפשר לבחור תיקייה ייעודית במקום השורש.",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GOOGLE_DRIVE_ACCOUNT",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXwl4ia8wcSDMLL",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblXwl4ia8wcSDMLL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('בניית HTML').item.json.recordId }}",
+            "PdfUrl": "={{ $json.webViewLink || ('https://drive.google.com/file/d/' + $json.id + '/view') }}",
+            "Status": "Issued"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "InvoiceNumber",
+              "displayName": "InvoiceNumber",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "CustomerId",
+              "displayName": "CustomerId",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "VatAmount",
+              "displayName": "VatAmount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "PdfUrl",
+              "displayName": "PdfUrl",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        -48
+      ],
+      "id": "c2334128-5635-462a-12ba-1e8fe437c363",
+      "name": "שמירת קישור המסמך",
+      "notes": "שלב 8 — שומר את הקישור למסמך בשדה PdfUrl ומסמן Status = Issued. האפליקציה מציגה את הקישור.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "כל דקה": {
+      "main": [
+        [
+          {
+            "node": "איתור חשבונית בתור",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "איתור חשבונית בתור": {
+      "main": [
+        [
+          {
+            "node": "האם יש חשבונית",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "האם יש חשבונית": {
+      "main": [
+        [
+          {
+            "node": "הכנת נתוני המסמך",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "הכנת נתוני המסמך": {
+      "main": [
+        [
+          {
+            "node": "בניית HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "בניית HTML": {
+      "main": [
+        [
+          {
+            "node": "המרה לקובץ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "המרה לקובץ": {
+      "main": [
+        [
+          {
+            "node": "העלאה לגוגל דרייב",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "העלאה לגוגל דרייב": {
+      "main": [
+        [
+          {
+            "node": "שמירת קישור המסמך",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5a9ae678-5f6c-57ad-f810-5d22e014a038",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "ERPAI0008WF8AAAA",
+  "tags": []
+}

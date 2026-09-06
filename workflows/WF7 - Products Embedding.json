@@ -1,0 +1,189 @@
+{
+  "name": "WF7 - מוצרים אל מאגר וקטורי",
+  "nodes": [
+    {
+      "parameters": {
+        "color": 6,
+        "width": 720,
+        "height": 320,
+        "content": "## WF7 — מוצרים ← מאגר וקטורי (RAG)\n**מה זה עושה:** מקבל בטופס את `data/products/products.csv` (34 מוצרים), כל שורה מומרת ל-embeddings ונשמרת במאגר הווקטורי תחת המפתח `theproducts`. כך סוכן שירות הלקוחות עונה על \"יש לכם אוזניות אלחוטיות?\" עם מפרט ומחיר אמיתיים.\n\n**סדר ההרצה:** קודם WF6 (מדיניות), אחר כך WF7 (מוצרים). שניהם ידניים לתמיד.\n\n**מודל ה-embeddings** — `text-embedding-3-small` — זהה ב-WF6, WF7, WF5 ו-WF13. מודל שונה באחד מהם היה גורם לשליפה להחזיר תוצאות אקראיות."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -352
+      ],
+      "id": "3382a606-faa6-4a10-ac19-b86139aa3c68",
+      "name": "פתק הסבר 1"
+    },
+    {
+      "parameters": {
+        "formTitle": "העלאת קטלוג מוצרים",
+        "formDescription": "העלו את הקובץ data/products/products.csv",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "קובץ מוצרים CSV",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".csv",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -272,
+        32
+      ],
+      "id": "f9eda132-a84f-4b69-2102-d5401b23cecd",
+      "name": "טופס העלאת מוצרים",
+      "notes": "שלב 1 — טופס בדפדפן להעלאת קובץ המוצרים.",
+      "notesInFlow": true,
+      "webhookId": "82fabefc-a621-4d5a-a60e-bdc172f8dc71"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "theproducts",
+          "mode": "list",
+          "cachedResultName": "theproducts"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        32
+      ],
+      "id": "48150c7a-b02b-da29-2089-9f9e5953bef0",
+      "name": "מאגר וקטורי - מוצרים",
+      "notes": "שלב 2 — כותב את המוצרים למאגר הווקטורי בזיכרון תחת המפתח theproducts.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        256
+      ],
+      "id": "5fa97a69-1f3b-1927-767c-e1471ea071fb",
+      "name": "המרה לווקטורים",
+      "notes": "ממיר את תיאורי המוצרים לווקטורים.",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "VRZfZHjkqfq2tlyY",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "loader": "csvLoader",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        256
+      ],
+      "id": "bb587790-1435-c1d9-44a2-44d9b708fc75",
+      "name": "טעינת קובץ CSV",
+      "notes": "קורא את קובץ ה-CSV — כל שורה היא מוצר.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "chunkSize": 1200,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        352,
+        448
+      ],
+      "id": "2dd4feb3-c718-1f07-08f0-c957ebfa08ac",
+      "name": "חיתוך לקטעים",
+      "notes": "חותך שורות מוצר ארוכות לקטעים, עם חפיפה שמונעת קטיעה באמצע מפרט.",
+      "notesInFlow": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "טופס העלאת מוצרים": {
+      "main": [
+        [
+          {
+            "node": "מאגר וקטורי - מוצרים",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "המרה לווקטורים": {
+      "ai_embedding": [
+        [
+          {
+            "node": "מאגר וקטורי - מוצרים",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "טעינת קובץ CSV": {
+      "ai_document": [
+        [
+          {
+            "node": "מאגר וקטורי - מוצרים",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "חיתוך לקטעים": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "טעינת קובץ CSV",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "522e20f8-9601-530b-dbe2-bd3de4670700",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "ERPAI0007WF7AAAA",
+  "tags": []
+}

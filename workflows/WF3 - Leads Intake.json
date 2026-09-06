@@ -1,0 +1,369 @@
+{
+  "name": "WF3 - קליטת לידים וסינון כפילויות",
+  "nodes": [
+    {
+      "parameters": {
+        "color": 4,
+        "width": 680,
+        "height": 320,
+        "content": "## WF3 — קליטת לידים וסינון כפילויות\n**מה זה עושה:** מקבל ליד חדש ב-Webhook (מהאפליקציה, מטופס או מכל מקור), בודק לפי כתובת המייל אם הליד כבר קיים בטבלת `Leads`, ואם לא — יוצר רשומה חדשה בסטטוס `New`.\n\n**גוף הבקשה:** `{ \"name\": \"...\", \"email\": \"...\", \"company\": \"...\" }`\n\n**התשובה:** `{ ok, status: \"created\" | \"duplicate\", recordId, message }`\n\n**מה צריך:** חיבור Airtable אחד."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -320
+      ],
+      "id": "1dda5626-c9e2-651e-45c0-7c9eadf40e74",
+      "name": "פתק הסבר 1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a35ea6d4-19c5-4c9d-be27-dc92d9a3a566",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -816,
+        32
+      ],
+      "id": "0c32eb84-af6f-bf7a-0256-26d325c66636",
+      "name": "קליטת ליד חדש",
+      "notes": "שלב 1 — מקבל ליד חדש בבקשת POST עם גוף { name, email, company }.",
+      "notesInFlow": true,
+      "webhookId": "a35ea6d4-19c5-4c9d-be27-dc92d9a3a566"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgCWOnLU1ZCJu9U",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblgCWOnLU1ZCJu9U"
+        },
+        "filterByFormula": "={Email}=\"{{ $json.body.email }}\"",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        32
+      ],
+      "id": "54b69d8f-f9cb-a3f7-13c0-84c45caf7c5f",
+      "name": "חיפוש ליד קיים",
+      "notes": "שלב 2 — מחפש בטבלת Leads אם כבר קיים ליד עם אותה כתובת מייל.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8a06339b-33c4-c785-7119-2abc57171ea3",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        32
+      ],
+      "id": "91aa4ff2-657f-cd1d-c688-5fca287fc15b",
+      "name": "האם ליד חדש",
+      "notes": "שלב 3 — החיפוש חזר ריק? כן → זהו ליד חדש. לא → זו כפילות.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appAPS688i7OgQKJT",
+          "mode": "list",
+          "cachedResultName": "FINAL",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgCWOnLU1ZCJu9U",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appAPS688i7OgQKJT/tblgCWOnLU1ZCJu9U"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('קליטת ליד חדש').item.json.body.name }}",
+            "Email": "={{ $('קליטת ליד חדש').item.json.body.email }}",
+            "Company": "={{ $('קליטת ליד חדש').item.json.body.company }}",
+            "Status": "New"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -64,
+        -96
+      ],
+      "id": "2f060495-7431-049e-7b27-1b71505a30fd",
+      "name": "יצירת ליד",
+      "notes": "שלב 4א — יוצר ליד חדש בסטטוס New. מכאן WF4a יאסוף אותו לשליחת מייל קר.",
+      "notesInFlow": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "jy5KXroQgbimx2aq",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "count",
+              "field": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        192
+      ],
+      "id": "929404ec-1ac4-82e6-e739-4dddfa1ee06a",
+      "name": "ספירת כפילויות",
+      "notes": "שלב 4ב — כפילות: סופר כמה רשומות קיימות לאותו מייל, בלי ליצור רשומה נוספת.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, status: 'created', recordId: $json.id, message: 'הליד נוצר בהצלחה' }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        -96
+      ],
+      "id": "afa19511-a400-026a-639a-9d13959c994d",
+      "name": "תשובה - נוצר",
+      "notes": "שלב 5א — מחזיר לאפליקציה תשובה: הליד נוצר.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, status: 'duplicate', existing: $json.count_id, message: 'הליד כבר קיים במערכת' }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        192
+      ],
+      "id": "d6e755fa-38e5-0d7e-d346-64a94ebeccef",
+      "name": "תשובה - כפילות",
+      "notes": "שלב 5ב — מחזיר לאפליקציה תשובה: הליד כבר קיים.",
+      "notesInFlow": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "קליטת ליד חדש": {
+      "main": [
+        [
+          {
+            "node": "חיפוש ליד קיים",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "חיפוש ליד קיים": {
+      "main": [
+        [
+          {
+            "node": "האם ליד חדש",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "האם ליד חדש": {
+      "main": [
+        [
+          {
+            "node": "יצירת ליד",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ספירת כפילויות",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "יצירת ליד": {
+      "main": [
+        [
+          {
+            "node": "תשובה - נוצר",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ספירת כפילויות": {
+      "main": [
+        [
+          {
+            "node": "תשובה - כפילות",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "19620fb2-a5f4-6f0a-296a-302e648f2158",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "ERPAI0003WF3AAAA",
+  "tags": []
+}

@@ -1,0 +1,188 @@
+{
+  "name": "WF6 - מדיניות אל מאגר וקטורי",
+  "nodes": [
+    {
+      "parameters": {
+        "color": 6,
+        "width": 720,
+        "height": 340,
+        "content": "## WF6 — מדיניות ← מאגר וקטורי (RAG)\n**מה זה עושה:** מקבל בטופס את קובצי המדיניות של העסק (התיקייה `data/policies`, 12 קבצי Markdown), חותך אותם לקטעים של כ-900 תווים, ממיר ל-embeddings ושומר במאגר הווקטורי בזיכרון תחת המפתח `mypolicies`. בפועל נוצרים 68 קטעים.\n\nסוכן שירות הלקוחות (WF5) שולף מכאן — וכך אינו ממציא תשובות.\n\n**הפעלה:** `Execute workflow` פותח טופס בדפדפן. התהליך נשאר **ידני לתמיד**.\n\n**חשוב:** המאגר יושב בזיכרון של n8n ונבנה מחדש בכל הרצה. `clearStore` מנקה אותו קודם, כדי שהרצה חוזרת לא תיצור כפילויות."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -352
+      ],
+      "id": "a79553fa-d986-48d9-5691-a13b47cc992b",
+      "name": "פתק הסבר 1"
+    },
+    {
+      "parameters": {
+        "formTitle": "העלאת מסמכי מדיניות",
+        "formDescription": "בחרו את כל קובצי המדיניות מהתיקייה data/policies והעלו אותם יחד.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "קובצי מדיניות",
+              "fieldType": "file",
+              "multipleFiles": true,
+              "acceptFileTypes": ".md,.txt,.pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -272,
+        32
+      ],
+      "id": "0eaf1c1a-d018-4f19-73ff-87c632bb56dd",
+      "name": "טופס העלאת מדיניות",
+      "notes": "שלב 1 — טופס בדפדפן להעלאת קובצי המדיניות (אפשר כמה קבצים יחד).",
+      "notesInFlow": true,
+      "webhookId": "33b7dec0-ddbd-4d1a-a738-1f162d8301f4"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "mypolicies",
+          "mode": "list",
+          "cachedResultName": "mypolicies"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        32
+      ],
+      "id": "1488f3ba-8c80-91e3-4502-4e1655a33b49",
+      "name": "מאגר וקטורי - מדיניות",
+      "notes": "שלב 2 — כותב את הקטעים למאגר הווקטורי בזיכרון, תחת המפתח mypolicies (מנקה קודם כדי למנוע כפילויות).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        256
+      ],
+      "id": "ecd98b61-349e-7003-119b-783a8b3ef088",
+      "name": "המרה לווקטורים",
+      "notes": "ממיר טקסט לווקטורים. מודל רב-לשוני שמטפל היטב בעברית.",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "VRZfZHjkqfq2tlyY",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        256
+      ],
+      "id": "61c1c7a1-e976-4af8-0589-09dd31217b6c",
+      "name": "טעינת המסמכים",
+      "notes": "טוען את תוכן הקבצים שהועלו בטופס.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "chunkSize": 900,
+        "chunkOverlap": 120,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        352,
+        448
+      ],
+      "id": "00c39230-22df-38cb-d8a1-7cd70711dd9e",
+      "name": "חיתוך לקטעים",
+      "notes": "חותך כל מסמך לקטעים של כ-900 תווים עם חפיפה — כך השליפה מדויקת.",
+      "notesInFlow": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "טופס העלאת מדיניות": {
+      "main": [
+        [
+          {
+            "node": "מאגר וקטורי - מדיניות",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "המרה לווקטורים": {
+      "ai_embedding": [
+        [
+          {
+            "node": "מאגר וקטורי - מדיניות",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "טעינת המסמכים": {
+      "ai_document": [
+        [
+          {
+            "node": "מאגר וקטורי - מדיניות",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "חיתוך לקטעים": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "טעינת המסמכים",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3abd5546-3447-7ae6-848f-c18e1c795cb6",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "ERPAI0006WF6AAAA",
+  "tags": []
+}
