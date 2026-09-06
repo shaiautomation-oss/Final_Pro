@@ -161,96 +161,110 @@ flowchart RL
 המערכת רצה מקצה לקצה. אלה צילומי המסך, לפי סדר הזרימה.
 
 <div align="center">
+
 <img src="screenshots/01-app-new-invoice.png" alt="יצירת חשבונית באפליקציית הניהול — לקוח וסכום בלבד" width="85%">
 
 *יצירת חשבונית באפליקציית הניהול — לקוח וסכום בלבד*
+
 <img src="screenshots/02-airtable-invoice-created.png" alt="הרשומה נוצרת ב-Airtable דרך ה-Webhook" width="85%">
 
 *הרשומה נוצרת ב-Airtable דרך ה-Webhook*
-<img src="screenshots/03-airtable-invoice-processed.png" alt="WF1 חישב מע"מ 18%, סכום כולל ומספר מסמך רץ" width="85%">
 
-*WF1 חישב מע"מ 18%, סכום כולל ומספר מסמך רץ*
+<img src="screenshots/03-airtable-invoice-processed.png" alt="WF1 חישב מע״מ 18%, סכום כולל ומספר מסמך רץ" width="85%">
+
+*WF1 חישב מע״מ 18%, סכום כולל ומספר מסמך רץ*
+
 <img src="screenshots/04-invoice-pdf-drive.png" alt="WF8 הפיק PDF בעברית RTL והעלה לגוגל דרייב" width="85%">
 
 *WF8 הפיק PDF בעברית RTL והעלה לגוגל דרייב*
+
 <img src="screenshots/05-app-new-lead.png" alt="יצירת ליד מהאפליקציה" width="85%">
 
 *יצירת ליד מהאפליקציה*
+
 <img src="screenshots/06-airtable-lead-created.png" alt="הליד נקלט ב-Airtable בסטטוס New" width="85%">
 
 *הליד נקלט ב-Airtable בסטטוס New*
+
 <img src="screenshots/07-cold-email.png" alt="המייל הקר שסוכן המכירות ניסח ושלח" width="85%">
 
 *המייל הקר שסוכן המכירות ניסח ושלח*
+
 <img src="screenshots/08-airtable-lead-contacted.png" alt="הסטטוס מתעדכן ל-Contacted אחרי השליחה" width="85%">
 
 *הסטטוס מתעדכן ל-Contacted אחרי השליחה*
+
 <img src="screenshots/09-customer-bot.png" alt="סוכן שירות הלקוחות עונה מתוך המדיניות והקטלוג" width="85%">
 
 *סוכן שירות הלקוחות עונה מתוך המדיניות והקטלוג*
+
 <img src="screenshots/10-manager-bot.png" alt="סוכן המנהל מדווח הכנסות ויתרות" width="85%">
 
 *סוכן המנהל מדווח הכנסות ויתרות*
+
 <img src="screenshots/11-manager-alert.png" alt="התראה אוטומטית כשליד משיב למייל" width="85%">
 
 *התראה אוטומטית כשליד משיב למייל*
+
 <img src="screenshots/12-app-dashboard.png" alt="הדשבורד המרכזי של אפליקציית הניהול" width="85%">
 
 *הדשבורד המרכזי של אפליקציית הניהול*
+
 </div>
 
-<details>
-<summary><b>אחד-עשר הקנבסים ב-n8n</b></summary>
+---
+
+## הקנבסים ב-n8n
+
+כל תהליך אחרי הרצה מוצלחת — שמות הצמתים והתיאורים בעברית.
 
 <div align="center">
 
-<img src="screenshots/workflows/wf1.png" alt="WF1 — אימות מסמכי מס — מע"מ, מספור ותור הפקה" width="92%">
+<img src="screenshots/workflows/wf1.png" alt="WF1 אימות מסמכי מס — מע״מ, מספור ותור הפקה" width="92%">
 
-**WF1** — אימות מסמכי מס — מע"מ, מספור ותור הפקה
+**WF1** — אימות מסמכי מס — מע״מ, מספור ותור הפקה
 
-<img src="screenshots/workflows/wf3-create.png" alt="WF3 — קליטת ליד חדש — מסלול היצירה" width="92%">
+<img src="screenshots/workflows/wf3-create.png" alt="WF3 קליטת ליד חדש — מסלול היצירה" width="92%">
 
 **WF3** — קליטת ליד חדש — מסלול היצירה
 
-<img src="screenshots/workflows/wf3-duplicate.png" alt="WF3 — אותו ליד בשנית — מסלול הכפילות" width="92%">
+<img src="screenshots/workflows/wf3-duplicate.png" alt="WF3 אותו ליד בשנית — מסלול הכפילות" width="92%">
 
 **WF3** — אותו ליד בשנית — מסלול הכפילות
 
-<img src="screenshots/workflows/wf4a.png" alt="WF4a — סוכן מכירות — ניסוח ושליחת מייל קר" width="92%">
+<img src="screenshots/workflows/wf4a.png" alt="WF4a סוכן מכירות — ניסוח ושליחת מייל קר" width="92%">
 
 **WF4a** — סוכן מכירות — ניסוח ושליחת מייל קר
 
-<img src="screenshots/workflows/wf4b.png" alt="WF4b — זיהוי תשובה, עדכון סטטוס והתראה למנהל" width="92%">
+<img src="screenshots/workflows/wf4b.png" alt="WF4b זיהוי תשובה, עדכון סטטוס והתראה למנהל" width="92%">
 
 **WF4b** — זיהוי תשובה, עדכון סטטוס והתראה למנהל
 
-<img src="screenshots/workflows/wf5.png" alt="WF5 — סוכן שירות לקוחות עם שני כלי RAG" width="92%">
+<img src="screenshots/workflows/wf5.png" alt="WF5 סוכן שירות לקוחות עם שני כלי RAG" width="92%">
 
 **WF5** — סוכן שירות לקוחות עם שני כלי RAG
 
-<img src="screenshots/workflows/wf6.png" alt="WF6 — 12 מסמכי מדיניות אל המאגר הווקטורי" width="92%">
+<img src="screenshots/workflows/wf6.png" alt="WF6 12 מסמכי מדיניות אל המאגר הווקטורי" width="92%">
 
 **WF6** — 12 מסמכי מדיניות אל המאגר הווקטורי
 
-<img src="screenshots/workflows/wf7.png" alt="WF7 — 34 מוצרים אל המאגר הווקטורי" width="92%">
+<img src="screenshots/workflows/wf7.png" alt="WF7 34 מוצרים אל המאגר הווקטורי" width="92%">
 
 **WF7** — 34 מוצרים אל המאגר הווקטורי
 
-<img src="screenshots/workflows/wf8.png" alt="WF8 — בניית המסמך, המרה ל-PDF והעלאה לדרייב" width="92%">
+<img src="screenshots/workflows/wf8.png" alt="WF8 בניית המסמך, המרה ל-PDF והעלאה לדרייב" width="92%">
 
 **WF8** — בניית המסמך, המרה ל-PDF והעלאה לדרייב
 
-<img src="screenshots/workflows/wf9.png" alt="WF9 — סוכן המנהל עם בקרת הרשאות" width="92%">
+<img src="screenshots/workflows/wf9.png" alt="WF9 סוכן המנהל עם בקרת הרשאות" width="92%">
 
 **WF9** — סוכן המנהל עם בקרת הרשאות
 
-<img src="screenshots/workflows/wf13.png" alt="WF13 — נקודת הכניסה של האפליקציה — ארבע פעולות" width="92%">
+<img src="screenshots/workflows/wf13.png" alt="WF13 נקודת הכניסה של האפליקציה — ארבע פעולות" width="92%">
 
 **WF13** — נקודת הכניסה של האפליקציה — ארבע פעולות
 
 </div>
-
-</details>
 
 ---
 
