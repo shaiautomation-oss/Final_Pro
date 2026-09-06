@@ -4,6 +4,8 @@
 
 פרויקט גמר · איי.איי אלקטרוניקה (AI Electronics) · n8n + סוכני AI + RAG + Airtable + Base44
 
+**🌐 [לתצוגת הפרויקט](https://shaiautomation-oss.github.io/Final_Pro/)**
+
 ---
 
 ## מה בניתי
@@ -64,6 +66,7 @@ ERP-AI/
 ├── data/
 │   ├── policies/                  12 מסמכי מדיניות — מקור ה-RAG (WF6)
 │   └── products/products.csv      34 מוצרים — מקור ה-RAG (WF7)
+├── index.html                     עמוד התצוגה של הפרויקט (GitHub Pages)
 ├── app/base44-prompt.md           שני הפרומטים שמהם נבנתה האפליקציה
 ├── screenshots/                   תיעוד ויזואלי של המערכת בפעולה
 └── docs/
