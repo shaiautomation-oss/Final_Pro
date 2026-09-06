@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERP-AI — דשבורד ניהול</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --ink: #16202e;
+    --muted: #6b7a90;
+    --line: #e2e8f0;
+    --brand: #1f4e79;
+    --ok: #128a54;
+    --warn: #b26a00;
+    --bad: #b3261e;
+    --info: #2563eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg); color: var(--ink); direction: rtl;
+  }
+  header {
+    background: var(--brand); color: #fff; padding: 18px 24px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  header h1 { margin: 0; font-size: 19px; font-weight: 600; }
+  header .sub { font-size: 12px; opacity: .8; margin-top: 3px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 22px; }
+
+  .setup {
+    background: #fff8e1; border: 1px solid #f0d78a; border-radius: 10px;
+    padding: 18px; margin-bottom: 22px;
+  }
+  .setup h2 { margin: 0 0 8px; font-size: 15px; }
+  .setup p { margin: 0 0 12px; font-size: 13px; color: #5c4a1a; line-height: 1.7; }
+  .setup .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .setup input {
+    flex: 1 1 300px; padding: 9px 12px; border: 1px solid #d8c68a;
+    border-radius: 7px; font-family: inherit; font-size: 13px; direction: ltr; text-align: left;
+  }
+  button {
+    background: var(--brand); color: #fff; border: 0; border-radius: 7px;
+    padding: 9px 20px; font-family: inherit; font-size: 13px; cursor: pointer;
+  }
+  button:hover { filter: brightness(1.12); }
+  button.ghost { background: transparent; color: var(--brand); border: 1px solid var(--brand); }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 14px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+  .kpi .label { font-size: 12px; color: var(--muted); }
+  .kpi .value { font-size: 26px; font-weight: 700; margin-top: 7px; letter-spacing: -.5px; }
+  .kpi .note { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .kpi.brand .value { color: var(--brand); }
+  .kpi.warn .value { color: var(--warn); }
+  .kpi.ok .value { color: var(--ok); }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    margin-top: 22px; overflow: hidden;
+  }
+  .panel > h2 {
+    margin: 0; padding: 14px 18px; font-size: 15px;
+    border-bottom: 1px solid var(--line); display: flex;
+    justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .panel .tools { display: flex; gap: 8px; flex-wrap: wrap; }
+  .panel input[type=search], .panel select {
+    padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px;
+    font-family: inherit; font-size: 12px;
+  }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: right; padding: 10px 14px; background: #f8fafc;
+    color: var(--muted); font-weight: 600; font-size: 12px;
+    border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; }
+  tbody tr:hover { background: #fafcff; }
+  .num { text-align: left; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .empty { padding: 34px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  .tag {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .t-ready   { background: #e0edfb; color: var(--info); }
+  .t-issued  { background: #dcf5e9; color: var(--ok); }
+  .t-paid    { background: #eceff3; color: var(--muted); }
+  .t-invalid { background: #fbe3e1; color: var(--bad); }
+  .t-new     { background: #e0edfb; color: var(--info); }
+  .t-contacted { background: #fdf0d9; color: var(--warn); }
+  .t-replied { background: #dcf5e9; color: var(--ok); }
+  .t-failed  { background: #fbe3e1; color: var(--bad); }
+  .t-open    { background: #fdf0d9; color: var(--warn); }
+  .t-done    { background: #dcf5e9; color: var(--ok); }
+  .t-none    { background: #eceff3; color: var(--muted); }
+
+  a.doc { color: var(--brand); text-decoration: none; font-weight: 600; }
+  a.doc:hover { text-decoration: underline; }
+
+  .err {
+    background: #fbe3e1; border: 1px solid #f0b5b0; color: var(--bad);
+    border-radius: 9px; padding: 14px 18px; margin-top: 18px;
+    font-size: 13px; line-height: 1.7;
+  }
+  footer { text-align: center; color: var(--muted); font-size: 11px; padding: 28px 18px 40px; line-height: 1.9; }
+  .hint { color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>ERP-AI — דשבורד ניהול</h1>
+    <div class="sub">איי.איי אלקטרוניקה · נתונים חיים מ-Airtable</div>
+  </div>
+  <div class="tools">
+    <span id="stamp" class="sub"></span>
+    <button id="settings" class="ghost" style="color:#fff;border-color:rgba(255,255,255,.5)">הגדרות</button>
+    <button id="reload" class="ghost" style="color:#fff;border-color:rgba(255,255,255,.5)">רענן</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="setup" id="setup">
+    <h2>הגדרה חד-פעמית</h2>
+    <p>
+      הדביקו כאן <strong>Personal Access Token</strong> של Airtable עם הרשאת
+      <code>data.records:read</code> על הבסיס <code>FINAL</code>.
+      הטוקן נשמר ב-<code>localStorage</code> של הדפדפן הזה בלבד ואינו נשלח לשום מקום
+      מלבד <code>api.airtable.com</code>.<br>
+      <strong>הקובץ הזה מיועד להרצה מקומית בלבד. אל תעלו אותו לאינטרנט עם טוקן בפנים.</strong>
+    </p>
+    <div class="row">
+      <input id="token" type="password" placeholder="patXXXXXXXXXXXXXX.xxxxxxxx..." autocomplete="off">
+      <input id="base" type="text" placeholder="Base ID" value="appAPS688i7OgQKJT">
+      <button id="save">שמור וטען</button>
+      <button id="clear" class="ghost">מחק טוקן</button>
+    </div>
+  </div>
+
+  <div id="error"></div>
+
+  <div class="kpis">
+    <div class="kpi brand"><div class="label">סך הכנסות (כולל מע"מ)</div><div class="value" id="k-rev">—</div><div class="note" id="k-rev-n">&nbsp;</div></div>
+    <div class="kpi"><div class="label">מספר חשבוניות</div><div class="value" id="k-cnt">—</div><div class="note" id="k-cnt-n">&nbsp;</div></div>
+    <div class="kpi warn"><div class="label">סכום שטרם שולם</div><div class="value" id="k-open">—</div><div class="note" id="k-open-n">&nbsp;</div></div>
+    <div class="kpi ok"><div class="label">לידים פעילים</div><div class="value" id="k-leads">—</div><div class="note" id="k-leads-n">&nbsp;</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>חשבוניות
+      <span class="tools">
+        <input type="search" id="q-inv" placeholder="חיפוש...">
+        <select id="f-inv"><option value="">כל הסטטוסים</option></select>
+      </span>
+    </h2>
+    <div class="scroll"><table>
+      <thead><tr>
+        <th>מספר</th><th>לקוח</th><th class="num">לפני מע"מ</th><th class="num">מע"מ</th>
+        <th class="num">סה"כ</th><th>סטטוס</th><th>נוצרה</th><th>מסמך</th>
+      </tr></thead>
+      <tbody id="tb-inv"><tr><td colspan="8" class="empty">ממתין לטוקן…</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <div class="panel">
+    <h2>לידים
+      <span class="tools">
+        <input type="search" id="q-lead" placeholder="חיפוש...">
+        <select id="f-lead"><option value="">כל הסטטוסים</option></select>
+      </span>
+    </h2>
+    <div class="scroll"><table>
+      <thead><tr><th>שם</th><th>מייל</th><th>חברה</th><th>סטטוס</th><th>נוצר</th></tr></thead>
+      <tbody id="tb-lead"><tr><td colspan="5" class="empty">ממתין לטוקן…</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <div class="panel">
+    <h2>מוצרים
+      <span class="tools">
+        <input type="search" id="q-prod" placeholder="חיפוש...">
+        <select id="f-prod"><option value="">כל הקטגוריות</option></select>
+      </span>
+    </h2>
+    <div class="scroll"><table>
+      <thead><tr><th>שם</th><th>קטגוריה</th><th class="num">מחיר</th><th>במלאי</th></tr></thead>
+      <tbody id="tb-prod"><tr><td colspan="4" class="empty">ממתין לטוקן…</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <div class="panel">
+    <h2>משימות</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>כותרת</th><th>סטטוס</th></tr></thead>
+      <tbody id="tb-task"><tr><td colspan="2" class="empty">ממתין לטוקן…</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <footer>
+    ERP-AI · פרויקט גמר · n8n + Airtable + סוכני AI<br>
+    דשבורד לקריאה בלבד. כל כתיבה למערכת עוברת דרך n8n (WF13), לא דרך הדף הזה.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var TABLES = {
+    Invoices: "tblXwl4ia8wcSDMLL",
+    Leads:    "tblgCWOnLU1ZCJu9U",
+    Products: "tbl4mva0zPHfY5qtt",
+    Tasks:    "tblJzJnQf8MFXsEPS"
+  };
+
+  var STATUS_CLASS = {
+    "Ready": "t-ready", "Issued": "t-issued", "Paid": "t-paid", "Invalid": "t-invalid",
+    "New": "t-new", "Contacted": "t-contacted", "Replied": "t-replied",
+    "Email Failed": "t-failed", "Open": "t-open", "Done": "t-done"
+  };
+
+  var STATUS_HE = {
+    "Ready": "מוכנה להפקה", "Issued": "הופקה", "Paid": "שולמה", "Invalid": "פסולה",
+    "New": "חדש", "Contacted": "נשלח מייל", "Replied": "השיב",
+    "Email Failed": "שליחה נכשלה", "Open": "פתוחה", "Done": "הושלמה"
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var store = {};   // name -> records
+
+  function ls(key, val) {
+    try {
+      if (val === undefined) return window.localStorage.getItem(key);
+      if (val === null) { window.localStorage.removeItem(key); return null; }
+      window.localStorage.setItem(key, val);
+      return val;
+    } catch (e) { return null; }
+  }
+
+  function money(n) {
+    if (n === undefined || n === null || n === "") return "—";
+    return Number(n).toLocaleString("he-IL", { maximumFractionDigits: 0 }) + " ₪";
+  }
+  function money2(n) {
+    if (n === undefined || n === null || n === "") return "—";
+    return Number(n).toLocaleString("he-IL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function dt(s) {
+    if (!s) return "—";
+    var d = new Date(s);
+    if (isNaN(d)) return "—";
+    return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
+  }
+  function esc(s) {
+    return String(s === undefined || s === null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function tag(v) {
+    if (!v) return '<span class="tag t-none">—</span>';
+    var cls = STATUS_CLASS[v] || "t-none";
+    return '<span class="tag ' + cls + '">' + esc(STATUS_HE[v] || v) + "</span>";
+  }
+  function showError(html) {
+    $("error").innerHTML = html ? '<div class="err">' + html + "</div>" : "";
+  }
+
+  function fetchTable(token, baseId, tableId) {
+    var out = [];
+    function page(offset) {
+      var url = "https://api.airtable.com/v0/" + baseId + "/" + tableId + "?pageSize=100";
+      if (offset) url += "&offset=" + encodeURIComponent(offset);
+      return fetch(url, { headers: { Authorization: "Bearer " + token } })
+        .then(function (r) {
+          if (!r.ok) {
+            return r.text().then(function (t) {
+              throw new Error("HTTP " + r.status + " — " + t.slice(0, 200));
+            });
+          }
+          return r.json();
+        })
+        .then(function (j) {
+          (j.records || []).forEach(function (rec) {
+            var row = Object.assign({}, rec.fields);
+            row.id = rec.id;
+            out.push(row);
+          });
+          if (j.offset) return page(j.offset);
+          return out;
+        });
+    }
+    return page(null);
+  }
+
+  function fillFilter(sel, values) {
+    var cur = sel.value;
+    sel.innerHTML = sel.options[0].outerHTML;
+    values.forEach(function (v) {
+      var o = document.createElement("option");
+      o.value = v;
+      o.textContent = STATUS_HE[v] || v;
+      sel.appendChild(o);
+    });
+    sel.value = cur;
+  }
+
+  function uniq(rows, field) {
+    var s = {};
+    rows.forEach(function (r) { if (r[field]) s[r[field]] = 1; });
+    return Object.keys(s).sort();
+  }
+
+  function match(row, q, fields) {
+    if (!q) return true;
+    q = q.toLowerCase();
+    return fields.some(function (f) {
+      return String(row[f] === undefined ? "" : row[f]).toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function render() {
+    var inv   = store.Invoices || [];
+    var leads = store.Leads    || [];
+    var prods = store.Products || [];
+    var tasks = store.Tasks    || [];
+
+    // ---- KPI ----
+    var revenue = inv.reduce(function (a, r) { return a + (Number(r.Total) || 0); }, 0);
+    var vat     = inv.reduce(function (a, r) { return a + (Number(r.VatAmount) || 0); }, 0);
+    var unpaid  = inv.filter(function (r) { return r.Status !== "Paid"; });
+    var openSum = unpaid.reduce(function (a, r) { return a + (Number(r.Total) || 0); }, 0);
+    var active  = leads.filter(function (r) { return r.Status === "New" || r.Status === "Contacted"; });
+    var replied = leads.filter(function (r) { return r.Status === "Replied"; }).length;
+
+    $("k-rev").textContent   = money(revenue);
+    $("k-rev-n").textContent = "מתוכם מע\"מ " + money(vat);
+    $("k-cnt").textContent   = inv.length;
+    $("k-cnt-n").textContent = inv.filter(function (r) { return r.Status === "Issued"; }).length + " הופקו כמסמך";
+    $("k-open").textContent  = money(openSum);
+    $("k-open-n").textContent = unpaid.length + " חשבוניות פתוחות";
+    $("k-leads").textContent = active.length;
+    $("k-leads-n").textContent = replied + " השיבו · " + leads.length + " בסך הכול";
+
+    // ---- Invoices ----
+    fillFilter($("f-inv"), uniq(inv, "Status"));
+    var qi = $("q-inv").value, fi = $("f-inv").value;
+    var rowsI = inv
+      .filter(function (r) { return (!fi || r.Status === fi) && match(r, qi, ["InvoiceNumber", "CustomerId", "Status"]); })
+      .sort(function (a, b) { return new Date(b.Created || 0) - new Date(a.Created || 0); });
+
+    $("tb-inv").innerHTML = rowsI.length ? rowsI.map(function (r) {
+      return "<tr>" +
+        "<td>" + esc(r.InvoiceNumber || "—") + "</td>" +
+        "<td>" + esc(r.CustomerId || "—") + "</td>" +
+        '<td class="num">' + money2(r.Amount) + "</td>" +
+        '<td class="num">' + money2(r.VatAmount) + "</td>" +
+        '<td class="num"><strong>' + money2(r.Total) + "</strong></td>" +
+        "<td>" + tag(r.Status) + "</td>" +
+        "<td>" + dt(r.Created) + "</td>" +
+        "<td>" + (r.PdfUrl
+            ? '<a class="doc" href="' + esc(r.PdfUrl) + '" target="_blank" rel="noopener">פתח מסמך</a>'
+            : '<span class="hint">—</span>') + "</td>" +
+        "</tr>";
+    }).join("") : '<tr><td colspan="8" class="empty">אין חשבוניות להצגה</td></tr>';
+
+    // ---- Leads ----
+    fillFilter($("f-lead"), uniq(leads, "Status"));
+    var ql = $("q-lead").value, fl = $("f-lead").value;
+    var rowsL = leads
+      .filter(function (r) { return (!fl || r.Status === fl) && match(r, ql, ["Name", "Email", "Company"]); })
+      .sort(function (a, b) { return new Date(b.Created || 0) - new Date(a.Created || 0); });
+
+    $("tb-lead").innerHTML = rowsL.length ? rowsL.map(function (r) {
+      return "<tr>" +
+        "<td>" + esc(r.Name || "—") + "</td>" +
+        '<td style="direction:ltr;text-align:right">' + esc(r.Email || "—") + "</td>" +
+        "<td>" + esc(r.Company || "—") + "</td>" +
+        "<td>" + tag(r.Status) + "</td>" +
+        "<td>" + dt(r.Created) + "</td>" +
+        "</tr>";
+    }).join("") : '<tr><td colspan="5" class="empty">אין לידים להצגה</td></tr>';
+
+    // ---- Products ----
+    fillFilter($("f-prod"), uniq(prods, "Category"));
+    var qp = $("q-prod").value, fp = $("f-prod").value;
+    var rowsP = prods.filter(function (r) {
+      return (!fp || r.Category === fp) && match(r, qp, ["Name", "Category", "Description"]);
+    });
+
+    $("tb-prod").innerHTML = rowsP.length ? rowsP.map(function (r) {
+      return "<tr>" +
+        "<td>" + esc(r.Name || "—") + "</td>" +
+        "<td>" + esc(r.Category || "—") + "</td>" +
+        '<td class="num">' + money(r.Price) + "</td>" +
+        "<td>" + (r.InStock
+            ? '<span class="tag t-done">במלאי</span>'
+            : '<span class="tag t-failed">אזל</span>') + "</td>" +
+        "</tr>";
+    }).join("") : '<tr><td colspan="4" class="empty">אין מוצרים להצגה</td></tr>';
+
+    // ---- Tasks ----
+    $("tb-task").innerHTML = tasks.length ? tasks.map(function (r) {
+      return "<tr><td>" + esc(r.Title || "—") + "</td><td>" + tag(r.Status) + "</td></tr>";
+    }).join("") : '<tr><td colspan="2" class="empty">אין משימות פתוחות</td></tr>';
+
+    $("stamp").textContent = "עודכן " + new Date().toLocaleTimeString("he-IL");
+  }
+
+  function loadAll() {
+    var token = ls("erpai_token");
+    var baseId = ls("erpai_base") || "appAPS688i7OgQKJT";
+    if (!token) { showError(""); return; }
+
+    showError("");
+    $("stamp").textContent = "טוען…";
+
+    Promise.all(Object.keys(TABLES).map(function (name) {
+      return fetchTable(token, baseId, TABLES[name]).then(function (rows) {
+        store[name] = rows;
+      });
+    })).then(render).catch(function (e) {
+      var msg = String(e.message || e);
+      var hint = "";
+      if (msg.indexOf("401") !== -1 || msg.indexOf("403") !== -1) {
+        hint = "<br>הטוקן שגוי או שאין לו הרשאה <code>data.records:read</code> על הבסיס הזה.";
+      } else if (msg.indexOf("404") !== -1) {
+        hint = "<br>ה-Base ID או מזהה טבלה אינם נכונים.";
+      } else if (msg.indexOf("Failed to fetch") !== -1) {
+        hint = "<br>הדפדפן חסם את הבקשה. ודאו חיבור לאינטרנט; אם פתחתם דרך <code>file://</code> נסו להריץ שרת מקומי.";
+      }
+      showError("<strong>שגיאה בטעינת הנתונים.</strong><br>" + esc(msg) + hint);
+      $("stamp").textContent = "";
+    });
+  }
+
+  // ---- wiring ----
+  $("save").addEventListener("click", function () {
+    var t = $("token").value.trim();
+    var b = $("base").value.trim();
+    if (!t) { showError("<strong>לא הוזן טוקן.</strong>"); return; }
+    ls("erpai_token", t);
+    ls("erpai_base", b || "appAPS688i7OgQKJT");
+    $("token").value = "";
+    loadAll();
+  });
+
+  $("clear").addEventListener("click", function () {
+    ls("erpai_token", null);
+    store = {};
+    render();
+    showError("<strong>הטוקן נמחק מהדפדפן.</strong> הזינו טוקן חדש כדי לטעון נתונים.");
+  });
+
+  $("reload").addEventListener("click", loadAll);
+
+  $("settings").addEventListener("click", function () {
+    var s = $("setup");
+    s.style.display = (s.style.display === "none") ? "" : "none";
+  });
+
+  ["q-inv", "f-inv", "q-lead", "f-lead", "q-prod", "f-prod"].forEach(function (id) {
+    $(id).addEventListener("input", render);
+    $(id).addEventListener("change", render);
+  });
+
+  var savedBase = ls("erpai_base");
+  if (savedBase) $("base").value = savedBase;
+  if (ls("erpai_token")) { $("setup").style.display = "none"; loadAll(); }
+})();
+</script>
+</body>
+</html>

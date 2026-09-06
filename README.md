@@ -4,15 +4,15 @@
 
 <br>
 
-![n8n](https://img.shields.io/badge/n8n-10%20workflows-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)
-![Airtable](https://img.shields.io/badge/Airtable-4%20tables-18BFFF?style=for-the-badge&logo=airtable&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-3%20agents-412991?style=for-the-badge&logo=openai&logoColor=white)
-![Telegram](https://img.shields.io/badge/Telegram-2%20bots-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)
+[![n8n](https://img.shields.io/badge/n8n-10%20workflows-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)](docs/03-workflows.md)
+[![Airtable](https://img.shields.io/badge/Airtable-4%20tables-18BFFF?style=for-the-badge&logo=airtable&logoColor=white)](docs/02-data-schema.md)
+[![OpenAI](https://img.shields.io/badge/OpenAI-3%20agents-412991?style=for-the-badge&logo=openai&logoColor=white)](#שלושת-הסוכנים)
+[![Telegram](https://img.shields.io/badge/Telegram-2%20bots-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](docs/05-telegram-bots.md)
 
-![No Code](https://img.shields.io/badge/code_nodes-0-0d9488?style=flat-square)
-![RAG](https://img.shields.io/badge/RAG-68%20chunks-1f4e79?style=flat-square)
-![Hebrew](https://img.shields.io/badge/UI-Hebrew%20RTL-6b7c93?style=flat-square)
-![VAT](https://img.shields.io/badge/VAT-18%25-b26a00?style=flat-square)
+[![No Code](https://img.shields.io/badge/code_nodes-0-0d9488?style=flat-square)](workflows)
+[![RAG](https://img.shields.io/badge/RAG-68%20chunks-1f4e79?style=flat-square)](#שלושת-הסוכנים)
+[![Hebrew](https://img.shields.io/badge/UI-Hebrew%20RTL-6b7c93?style=flat-square)](#מה-בניתי)
+[![VAT](https://img.shields.io/badge/VAT-18%25-b26a00?style=flat-square)](docs/06-tax-and-vat.md)
 
 **[🌐 לתצוגת הפרויקט](https://shaiautomation-oss.github.io/Final_Pro/)**
 
@@ -145,7 +145,9 @@ ERP-AI/
 ├── data/
 │   ├── policies/                  12 מסמכי מדיניות — מקור ה-RAG
 │   └── products/products.csv      34 מוצרים — מקור ה-RAG
-├── app/base44-prompt.md           שני הפרומטים שמהם נבנתה האפליקציה
+├── app/
+│   ├── base44-prompt.md           שני הפרומטים שמהם נבנתה האפליקציה
+│   └── Dashboard.html             דשבורד עצמאי להרצה מקומית
 ├── screenshots/                   תיעוד ויזואלי
 └── docs/                          6 מסמכי תיעוד
 ```
@@ -192,7 +194,8 @@ ERP-AI/
 הפרדתי בין שני בוטי טלגרם: בוט המנהל מוגן בתנאי שמשווה את מזהה הצ'אט לזה של
 הבעלים, וכל פנייה אחרת מקבלת סירוב בלי נתונים.
 
-אין בפרויקט שום קובץ שמכיל מפתח, טוקן או סוד. הגישה לנתונים אפשרית רק דרך
-החיבורים המוגדרים ב-n8n.
+`app/Dashboard.html` הוא היוצא מן הכלל: הוא קורא ישירות מ-Airtable ודורש טוקן
+קריאה, ולכן מיועד להרצה מקומית בלבד. הטוקן נשמר ב-`localStorage` של הדפדפן
+ואינו נכתב לשום קובץ — בריפו עצמו אין שום מפתח, טוקן או סוד.
 
 </div>
