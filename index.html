@@ -350,6 +350,36 @@
   </div>
 </section>
 
+<section id="canvases">
+  <div class="wrap">
+    <h2>הקנבסים ב-n8n</h2>
+    <p class="lede">עשרת התהליכים כפי שהם נראים על הקנבס — שמות צמתים ותיאורים בעברית.</p>
+    <div class="gallery" id="canvas-shots">
+      <figure><img src="screenshots/workflows/wf1.png" alt="WF1 — אימות מסמכי מס" loading="lazy">
+        <figcaption><b>WF1</b> — אימות מסמכי מס</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf3.png" alt="WF3 — קליטת לידים וסינון כפילויות" loading="lazy">
+        <figcaption><b>WF3</b> — קליטת לידים וסינון כפילויות</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf4a.png" alt="WF4a — סוכן מכירות — מיילים קרים" loading="lazy">
+        <figcaption><b>WF4a</b> — סוכן מכירות — מיילים קרים</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf4b.png" alt="WF4b — סוכן מכירות — זיהוי תשובות" loading="lazy">
+        <figcaption><b>WF4b</b> — סוכן מכירות — זיהוי תשובות</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf5.png" alt="WF5 — סוכן שירות לקוחות" loading="lazy">
+        <figcaption><b>WF5</b> — סוכן שירות לקוחות</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf6.png" alt="WF6 — מדיניות אל מאגר וקטורי" loading="lazy">
+        <figcaption><b>WF6</b> — מדיניות אל מאגר וקטורי</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf7.png" alt="WF7 — מוצרים אל מאגר וקטורי" loading="lazy">
+        <figcaption><b>WF7</b> — מוצרים אל מאגר וקטורי</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf8.png" alt="WF8 — הפקת מסמך חשבונית" loading="lazy">
+        <figcaption><b>WF8</b> — הפקת מסמך חשבונית</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf9.png" alt="WF9 — סוכן המנהל" loading="lazy">
+        <figcaption><b>WF9</b> — סוכן המנהל</figcaption></figure>
+      <figure><img src="screenshots/workflows/wf13.png" alt="WF13 — Webhook לאפליקציה" loading="lazy">
+        <figcaption><b>WF13</b> — Webhook לאפליקציה</figcaption></figure>
+    </div>
+    <p class="gallery-empty" id="canvas-empty" hidden>צילומי הקנבסים יתווספו בקרוב.</p>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <h2>התיעוד</h2>
@@ -389,16 +419,19 @@
 <script>
   // תמונות שטרם הועלו לא יוצגו כתמונה שבורה
   (function () {
-    var figs = document.querySelectorAll('#shots figure');
-    var left = figs.length;
-    figs.forEach(function (f) {
-      var img = f.querySelector('img');
-      img.addEventListener('error', function () {
-        f.remove();
-        if (--left === 0) {
-          document.getElementById('shots').hidden = true;
-          document.getElementById('empty').hidden = false;
-        }
+    [['shots', 'empty'], ['canvas-shots', 'canvas-empty']].forEach(function (pair) {
+      var box = document.getElementById(pair[0]);
+      if (!box) return;
+      var figs = box.querySelectorAll('figure');
+      var left = figs.length;
+      figs.forEach(function (f) {
+        f.querySelector('img').addEventListener('error', function () {
+          f.remove();
+          if (--left === 0) {
+            box.hidden = true;
+            document.getElementById(pair[1]).hidden = false;
+          }
+        });
       });
     });
   })();

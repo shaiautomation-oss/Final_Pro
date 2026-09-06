@@ -128,11 +128,65 @@
 
 *הנתונים ב-Airtable אחרי ריצה מלאה*
 
-<img src="screenshots/06-canvas.png" alt="קנבס אוטומציה ב-n8n" width="80%">
+</div>
 
-*קנבס האוטומציה — צמתים ותיאורים בעברית*
+<details>
+<summary><b>עשרת הקנבסים ב-n8n</b></summary>
+
+<div align="center">
+
+<img src="screenshots/workflows/wf1.png" alt="WF1 — אימות מסמכי מס" width="90%">
+
+**WF1** — אימות מסמכי מס
+
+
+<img src="screenshots/workflows/wf3.png" alt="WF3 — קליטת לידים וסינון כפילויות" width="90%">
+
+**WF3** — קליטת לידים וסינון כפילויות
+
+
+<img src="screenshots/workflows/wf4a.png" alt="WF4a — סוכן מכירות — מיילים קרים" width="90%">
+
+**WF4a** — סוכן מכירות — מיילים קרים
+
+
+<img src="screenshots/workflows/wf4b.png" alt="WF4b — סוכן מכירות — זיהוי תשובות" width="90%">
+
+**WF4b** — סוכן מכירות — זיהוי תשובות
+
+
+<img src="screenshots/workflows/wf5.png" alt="WF5 — סוכן שירות לקוחות" width="90%">
+
+**WF5** — סוכן שירות לקוחות
+
+
+<img src="screenshots/workflows/wf6.png" alt="WF6 — מדיניות אל מאגר וקטורי" width="90%">
+
+**WF6** — מדיניות אל מאגר וקטורי
+
+
+<img src="screenshots/workflows/wf7.png" alt="WF7 — מוצרים אל מאגר וקטורי" width="90%">
+
+**WF7** — מוצרים אל מאגר וקטורי
+
+
+<img src="screenshots/workflows/wf8.png" alt="WF8 — הפקת מסמך חשבונית" width="90%">
+
+**WF8** — הפקת מסמך חשבונית
+
+
+<img src="screenshots/workflows/wf9.png" alt="WF9 — סוכן המנהל" width="90%">
+
+**WF9** — סוכן המנהל
+
+
+<img src="screenshots/workflows/wf13.png" alt="WF13 — Webhook לאפליקציה" width="90%">
+
+**WF13** — Webhook לאפליקציה
 
 </div>
+
+</details>
 
 ---
 
